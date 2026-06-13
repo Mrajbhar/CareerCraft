@@ -1,5 +1,10 @@
-// ===> place at: client/src/App.jsx  (replaces your current one)
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Background from "./components/Background";
 import Navbar from "./components/Navbar";
@@ -8,8 +13,9 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Builder from "./pages/Builder";
-import ResumeView from "./pages/Resumeview";
+import ResumeView from "./pages/ResumeView";
 import Prep from "./pages/Prep";
+import Templates from "./pages/Templates";
 import Checker from "./pages/Checker";
 
 const Private = ({ children }) => {
@@ -19,9 +25,11 @@ const Private = ({ children }) => {
 
 function Shell() {
   const { pathname } = useLocation();
-  // hide footer on full-screen views (the editor + the split-screen auth pages)
+
   const hideFooter =
-    pathname.startsWith("/builder") || pathname === "/login" || pathname === "/signup";
+    pathname.startsWith("/builder") ||
+    pathname === "/login" ||
+    pathname === "/signup";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -35,11 +43,54 @@ function Shell() {
           <Route path="/signup" element={<Login />} />
           <Route path="/reset" element={<Login />} />
 
-          <Route path="/dashboard" element={<Private><Dashboard /></Private>} />
-          <Route path="/builder/:id" element={<Private><Builder /></Private>} />
-          <Route path="/resume/:id" element={<Private><ResumeView /></Private>} />
-          <Route path="/prep" element={<Private><Prep /></Private>} />
-          <Route path="/checker" element={<Private><Checker /></Private>} />
+          <Route
+            path="/dashboard"
+            element={
+              <Private>
+                <Dashboard />
+              </Private>
+            }
+          />
+          <Route
+            path="/templates"
+            element={
+              <Private>
+                <Templates />
+              </Private>
+            }
+          />
+          <Route
+            path="/builder/:id"
+            element={
+              <Private>
+                <Builder />
+              </Private>
+            }
+          />
+          <Route
+            path="/resume/:id"
+            element={
+              <Private>
+                <ResumeView />
+              </Private>
+            }
+          />
+          <Route
+            path="/prep"
+            element={
+              <Private>
+                <Prep />
+              </Private>
+            }
+          />
+          <Route
+            path="/checker"
+            element={
+              <Private>
+                <Checker />
+              </Private>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
