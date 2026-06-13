@@ -1,4 +1,4 @@
-// ===> place at: client/src/components/Navbar.jsx
+
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Layers, LayoutDashboard, LogOut, Brain, ClipboardCheck, Menu, X, ChevronDown } from "lucide-react";

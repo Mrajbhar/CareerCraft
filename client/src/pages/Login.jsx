@@ -1,5 +1,4 @@
-// ===> place at: client/src/pages/Login.jsx
-// Split-screen auth: brand panel + form. Modes: login / signup / forgot / reset.
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {

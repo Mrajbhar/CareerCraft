@@ -32,7 +32,7 @@ function migrate(d = {}) {
 
 const PREFS = [["remote", "Open to Remote"], ["relocate", "Open to Relocate"], ["hybrid", "Open to Hybrid"], ["travel", "Open to Travel"], ["onsite", "Open to On-Site"]];
 
-/* animated accordion section */
+
 function Acc({ id, icon: Icon, title, count, action, open, setOpen, children }) {
   const isOpen = open === id;
   return (

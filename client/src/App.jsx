@@ -8,7 +8,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Builder from "./pages/Builder";
-import ResumeView from "./pages/ResumeView";
+import ResumeView from "./pages/Resumeview";
 import Prep from "./pages/Prep";
 import Checker from "./pages/Checker";
 
