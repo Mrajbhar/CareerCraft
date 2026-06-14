@@ -14,7 +14,6 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(
   cors({
     origin: process.env.CLIENT_URL,
@@ -24,7 +23,6 @@ app.use(
 
 app.use(express.json());
 
-// Request Logger
 app.use(
   morgan((tokens, req, res) => {
     const status = Number(tokens.status(req, res)) || 0;
@@ -48,7 +46,6 @@ app.use(
   })
 );
 
-// Health Check Routes
 app.get("/", (_req, res) => {
   res.status(200).json({
     success: true,
@@ -70,7 +67,6 @@ app.get("/health", (_req, res) => {
   });
 });
 
-// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/ai", aiRoutes);
@@ -83,7 +79,6 @@ app.use((req, res) => {
   });
 });
 
-// Connect Database & Start Server
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -106,7 +101,6 @@ mongoose
     process.exit(1);
   });
 
-// Global Error Handlers
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err);
 });
