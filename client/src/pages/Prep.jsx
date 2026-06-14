@@ -6,6 +6,7 @@ import {
 import CodeRunner from "../components/CodeRunner";
 import { dsaTheory } from "../data/dsaTheory";
 import { dsaCourse, learningOrder } from "../data/dsaCourse";
+import { dsaProblems } from "../data/dsaProblems";
 import { companies } from "../data/companies";
 
 const dsaTopics = [
@@ -98,6 +99,7 @@ export default function Prep() {
   const [hideSolved, setHideSolved] = useState(false);
   const [randomQ, setRandomQ] = useState(null);
   const [activeTopic, setActiveTopic] = useState(null);
+  const [activeProblem, setActiveProblem] = useState(null);
   const [codeLang, setCodeLang] = useState("Python");
   const [companyQ, setCompanyQ] = useState("");
   const [companyCat, setCompanyCat] = useState("All");
@@ -117,7 +119,7 @@ export default function Prep() {
   const pickRandom = () => setRandomQ(allBehavioral[Math.floor(Math.random() * allBehavioral.length)]);
 
   useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") setActiveTopic(null); };
+    const onKey = (e) => { if (e.key === "Escape") { setActiveTopic(null); setActiveProblem(null); } };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -195,13 +197,23 @@ export default function Prep() {
                         style={{ borderColor: solved[p] ? "#18a884" : "var(--color-line)", background: solved[p] ? "#18a884" : "transparent" }}>
                         {solved[p] && <Check size={12} className="text-white" />}
                       </button>
-                      <a href={lc(p)} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 flex-1 min-w-0">
-                        <span className={`text-sm font-medium truncate ${solved[p] ? "line-through text-ink2" : ""}`}>{p}</span>
-                        <span className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: diffColor(d), background: diffColor(d) + "1a" }}>{d}</span>
-                          <ExternalLink size={13} className="text-ink2 group-hover:text-brand transition" />
-                        </span>
-                      </a>
+                      {dsaProblems[p] ? (
+                        <button onClick={() => setActiveProblem(p)} className="flex items-center justify-between gap-2 flex-1 min-w-0 text-left">
+                          <span className={`text-sm font-medium truncate ${solved[p] ? "line-through text-ink2" : ""}`}>{p}</span>
+                          <span className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand text-white tracking-wide">SOLVE</span>
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: diffColor(d), background: diffColor(d) + "1a" }}>{d}</span>
+                          </span>
+                        </button>
+                      ) : (
+                        <a href={lc(p)} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                          <span className={`text-sm font-medium truncate ${solved[p] ? "line-through text-ink2" : ""}`}>{p}</span>
+                          <span className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ color: diffColor(d), background: diffColor(d) + "1a" }}>{d}</span>
+                            <ExternalLink size={13} className="text-ink2 group-hover:text-brand transition" />
+                          </span>
+                        </a>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -459,6 +471,75 @@ export default function Prep() {
           </div>
         </div>
       )}
+      {activeProblem && dsaProblems[activeProblem] && (() => {
+        const pr = dsaProblems[activeProblem];
+        return (
+          <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center p-0 sm:p-6" style={{ background: "rgba(0,0,0,.65)" }} onClick={() => setActiveProblem(null)}>
+            <div onClick={(e) => e.stopPropagation()} className="relative bg-card border border-line w-full sm:max-w-4xl sm:rounded-2xl overflow-hidden flex flex-col max-h-screen sm:max-h-[92vh]" style={{ animation: "secUp .25s ease both" }}>
+              <div className="flex items-center justify-between gap-3 p-5 border-b border-line shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <button onClick={() => toggleSolved(activeProblem)} title={solved[activeProblem] ? "Solved — click to undo" : "Mark as solved"}
+                    className="shrink-0 grid place-items-center w-7 h-7 rounded-full border transition"
+                    style={{ borderColor: solved[activeProblem] ? "#18a884" : "var(--color-line)", background: solved[activeProblem] ? "#18a884" : "transparent" }}>
+                    {solved[activeProblem] && <Check size={14} className="text-white" />}
+                  </button>
+                  <div className="min-w-0">
+                    <h2 className="font-display text-xl font-semibold truncate">{activeProblem}</h2>
+                    <p className="text-xs text-ink2 truncate">{pr.topic}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ color: diffColor(pr.difficulty), background: diffColor(pr.difficulty) + "1a" }}>{pr.difficulty}</span>
+                  <button onClick={() => setActiveProblem(null)} aria-label="Close" className="grid place-items-center w-9 h-9 rounded-lg border border-line bg-white text-ink2 hover:text-ink"><X size={18} /></button>
+                </div>
+              </div>
+
+              <div className="overflow-y-auto p-5 sm:p-6">
+                <p className="text-[15px] leading-7 text-ink mb-5">{pr.statement}</p>
+
+                <h4 className="font-display text-base font-semibold mb-2">Examples</h4>
+                <div className="flex flex-col gap-2.5 mb-5">
+                  {pr.examples.map((ex, i) => (
+                    <div key={i} className="rounded-xl border border-line bg-paper px-4 py-3 text-sm">
+                      <div style={{ fontFamily: "ui-monospace, Menlo, monospace" }} className="text-[13px]"><span className="text-ink2">Input: </span>{ex.input}</div>
+                      <div style={{ fontFamily: "ui-monospace, Menlo, monospace" }} className="text-[13px] mt-1"><span className="text-ink2">Output: </span>{ex.output}</div>
+                      {ex.explanation && <div className="text-ink2 mt-1.5 leading-6">{ex.explanation}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                {pr.constraints?.length > 0 && (
+                  <>
+                    <h4 className="font-display text-base font-semibold mb-2">Constraints</h4>
+                    <ul className="flex flex-col gap-1.5 mb-5">
+                      {pr.constraints.map((c, i) => (
+                        <li key={i} className="flex gap-2.5 text-sm text-ink2"><span className="shrink-0 mt-2 w-1.5 h-1.5 rounded-full bg-brand" /><span style={{ fontFamily: "ui-monospace, Menlo, monospace" }} className="text-[13px]">{c}</span></li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {pr.hints?.length > 0 && (
+                  <details className="mb-6 rounded-xl border border-line bg-paper px-4 py-3">
+                    <summary className="cursor-pointer text-sm font-semibold text-brand select-none">Show hints ({pr.hints.length})</summary>
+                    <ul className="flex flex-col gap-2 mt-3">
+                      {pr.hints.map((h, i) => (
+                        <li key={i} className="flex gap-2.5 text-sm leading-6" style={{ color: "#cdd3de" }}><span className="shrink-0 font-bold text-brand">{i + 1}.</span><span>{h}</span></li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <h4 className="font-display text-base font-semibold">Solve here</h4>
+                  <a href={lc(activeProblem)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink2 hover:text-brand transition">Open on LeetCode <ExternalLink size={13} /></a>
+                </div>
+                <CodeRunner key={activeProblem} initialLangKey="python" initialCode={pr.starter} />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
       <style>{`@keyframes secUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}`}</style>
 
     </div>

@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
+import { Select } from "../components/ui";
 
 const tpl = (t) =>
   t === "modern" ? { c: "#e0743a", soft: "rgba(224,116,58,.12)" }
@@ -14,6 +15,8 @@ const tpl = (t) =>
   : t === "minimal" ? { c: "#2dd4bf", soft: "rgba(45,212,191,.12)" }
   : t === "elegant" ? { c: "#caa05a", soft: "rgba(202,160,90,.14)" }
   : t === "compact" ? { c: "#9c6b3f", soft: "rgba(156,107,63,.16)" }
+  : t === "standard" ? { c: "#1a7a61", soft: "rgba(26,122,97,.14)" }
+  : t === "executive" ? { c: "#8a6d3b", soft: "rgba(138,109,59,.16)" }
   : { c: "#18a884", soft: "rgba(24,168,132,.12)" };
 
 const hasContent = (arr) =>
@@ -52,6 +55,7 @@ function CountUp({ to = 0, ms = 900 }) {
   return <>{n}</>;
 }
 
+/* animated circular progress ring */
 function Ring({ value = 0, size = 66, stroke = 7, color = "#15634f" }) {
   const r = (size - stroke) / 2, circ = 2 * Math.PI * r;
   const [v, setV] = useState(0);
@@ -68,7 +72,7 @@ function Ring({ value = 0, size = 66, stroke = 7, color = "#15634f" }) {
   );
 }
 
-
+/* animated bar fill */
 function Bar({ pct = 0, color = "#15634f", h = 6 }) {
   const [w, setW] = useState(0);
   useEffect(() => { const t = setTimeout(() => setW(pct), 80); return () => clearTimeout(t); }, [pct]);
@@ -122,7 +126,14 @@ export default function Dashboard() {
     const total = resumes.length;
     const week = resumes.filter((r) => Date.now() - new Date(r.updatedAt) < 7 * 864e5).length;
     const last = resumes[0]?.updatedAt ? new Date([...resumes].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0].updatedAt).toLocaleDateString() : "—";
-    const top = total ? (resumes.filter((r) => r.template === "modern").length > total / 2 ? "Modern" : "Classic") : "—";
+    const top = total
+      ? (() => {
+          const m = {};
+          resumes.forEach((r) => { const t = r.template || "classic"; m[t] = (m[t] || 0) + 1; });
+          const best = Object.entries(m).sort((a, b) => b[1] - a[1])[0]?.[0] || "classic";
+          return best.charAt(0).toUpperCase() + best.slice(1);
+        })()
+      : "—";
     return { total, week, last, top };
   }, [resumes]);
 
@@ -162,7 +173,7 @@ export default function Dashboard() {
   const firstName = user?.name?.split(" ")[0] || "there";
   const hour = new Date().getHours();
   const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const chips = ["all", "classic", "modern", "professional", "standard", "minimal", "elegant", "compact"];
+  const chips = ["all", "classic", "modern", "professional", "standard", "minimal", "elegant", "compact", "executive"];
   const detailsReady = Object.keys(details).length > 0;
   const statCards = [
     { icon: Files, label: "Total resumes", node: <CountUp to={stats.total} />, color: "#15634f" },
@@ -181,15 +192,15 @@ export default function Dashboard() {
         .shimmer{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.10) 37%,rgba(255,255,255,.04) 63%);background-size:200% 100%;animation:shimmer 1.4s infinite}
       `}</style>
 
-     
+      {/* hero */}
       <section className="relative overflow-hidden rounded-3xl text-white p-7 sm:p-10 mb-6"
         style={{ background: "linear-gradient(120deg,#15634f 0%,#1a7a61 45%,#114f3f 100%)", backgroundSize: "180% 180%", animation: "fadeUp .5s ease both, gradPan 12s ease infinite" }}>
-       
+        {/* dot-grid texture */}
         <div className="absolute inset-0 opacity-[0.14]" style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "22px 22px" }} />
-        
+        {/* blobs */}
         <div className="absolute -top-16 -right-10 w-64 h-64 rounded-full bg-white/10 blur-2xl" style={{ animation: "floatY 7s ease-in-out infinite" }} />
         <div className="absolute -bottom-20 right-32 w-56 h-56 rounded-full bg-rust/30 blur-3xl" style={{ animation: "floatY 9s ease-in-out infinite" }} />
-       
+        {/* concentric rings */}
         <div className="hidden sm:block absolute top-1/2 -right-24 -translate-y-1/2" aria-hidden>
           {[0, 1, 2].map((i) => <div key={i} className="absolute rounded-full border border-white/10" style={{ width: 200 + i * 90, height: 200 + i * 90, left: -((i * 90) / 2), top: -((200 + i * 90) / 2) }} />)}
         </div>
@@ -214,7 +225,7 @@ export default function Dashboard() {
         </div>
       </section>
 
-    
+      {/* stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-5">
         {statCards.map((s, i) => (
           <div key={s.label} className="group relative overflow-hidden rounded-2xl border border-line bg-card p-4 sm:p-5 hover:-translate-y-1 transition-all"
@@ -229,7 +240,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-     
+      {/* insights */}
       {!loading && resumes.length > 0 && detailsReady && (
         <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-7" style={{ animation: "fadeUp .5s ease both" }}>
           <div className="rounded-2xl border border-line bg-card p-4 sm:p-5">
@@ -261,7 +272,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      
+      {/* toolbar */}
       {!loading && resumes.length > 0 && (
         <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-6" style={{ animation: "fadeUp .5s ease both", animationDelay: "320ms" }}>
           <div className="relative flex-1 max-w-sm">
@@ -276,13 +287,13 @@ export default function Dashboard() {
             ))}
           </div>
           <div className="flex items-center gap-2">
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}
-              className="rounded-lg border border-line bg-card text-sm font-semibold px-3 py-2 outline-none cursor-pointer focus:border-brand">
-              <option value="recent">Recent</option>
-              <option value="name">Name A–Z</option>
-              <option value="template">Template</option>
-              <option value="complete">Most complete</option>
-            </select>
+            <Select theme="dark" width={150} value={sortBy} onChange={setSortBy}
+              options={[
+                { value: "recent", label: "Recent" },
+                { value: "name", label: "Name A–Z" },
+                { value: "template", label: "Template" },
+                { value: "complete", label: "Most complete" },
+              ]} />
             <div className="flex rounded-lg border border-line overflow-hidden">
               <button onClick={() => setView("grid")} className={`p-2 ${view === "grid" ? "bg-brand text-white" : "bg-card text-ink2"}`}><LayoutGrid size={17} /></button>
               <button onClick={() => setView("list")} className={`p-2 ${view === "list" ? "bg-brand text-white" : "bg-card text-ink2"}`}><List size={17} /></button>
@@ -291,7 +302,7 @@ export default function Dashboard() {
         </div>
       )}
 
-     
+      {/* content */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
           {[0, 1, 2].map((i) => <div key={i} className="h-52 rounded-2xl border border-line shimmer" />)}
@@ -310,7 +321,7 @@ export default function Dashboard() {
                 style={{ animation: "fadeUp .5s ease both", animationDelay: `${i * 50 + 360}ms`, boxShadow: "0 1px 2px rgba(0,0,0,.04)" }}
                 onMouseEnter={(e) => (e.currentTarget.style.boxShadow = `0 24px 50px -16px ${a.c}66`)}
                 onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,.04)")}>
-               
+                {/* shine sweep */}
                 <span className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out z-10" style={{ background: "linear-gradient(105deg,transparent 42%,rgba(255,255,255,.45) 50%,transparent 58%)" }} />
                 <div style={{ height: 6, background: a.c }} />
                 <div className="p-5">

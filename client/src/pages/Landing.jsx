@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
 import {
@@ -21,9 +20,9 @@ const sample = {
 };
 
 const features = [
-  { icon: Sparkles, title: "AI writing & review", text: "Generate a sharp summary, polish your bullet points, and get recruiter-style feedback in one click.", color: "#15634f" },
-  { icon: ClipboardCheck, title: "ATS resume checker", text: "Upload any PDF or Word resume and get an instant ATS-friendliness score with fixes.", color: "#2dd4bf" },
-  { icon: LayoutTemplate, title: "4 professional templates", text: "Classic, Modern, Professional and Standard — switch instantly and see it live.", color: "#c6692f" },
+  { icon: Sparkles, title: "AI writing & review", text: "Generate a sharp summary, polish your bullet points, get recruiter-style feedback, and draft a tailored cover letter — all AI-powered.", color: "#15634f" },
+  { icon: ClipboardCheck, title: "ATS checker & job match", text: "Upload any resume for an instant ATS score, or match it against a job description to spot missing keywords.", color: "#2dd4bf" },
+  { icon: LayoutTemplate, title: "8 professional templates", text: "Classic, Modern, Professional, Standard, Minimal, Elegant, Compact & Executive — switch instantly, with font and size controls.", color: "#c6692f" },
   { icon: FileDown, title: "PDF & Word export", text: "Download a clean, recruiter-ready file in either format, exactly as previewed.", color: "#15634f" },
   { icon: Code2, title: "Built-in code compiler", text: "Practice coding in 7 languages right in the browser — no setup, with syntax colors.", color: "#d4a23a" },
   { icon: Brain, title: "Interview prep", text: "DSA patterns, behavioral questions and system-design drills, all in one studio.", color: "#b3402b" },
@@ -31,7 +30,7 @@ const features = [
 
 const skills = ["React", "Node.js", "TypeScript", "Python", "Java", "C++", "Go", "AWS", "Docker", "MongoDB", "GraphQL", "Kubernetes"];
 
-
+/* reveal-on-scroll wrapper */
 function Reveal({ children, delay = 0, className = "" }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
@@ -49,7 +48,7 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
-
+/* count-up that starts when scrolled into view */
 function CountUp({ to, suffix = "", ms = 1300 }) {
   const ref = useRef(null);
   const [n, setN] = useState(0);
@@ -90,9 +89,9 @@ export default function Landing() {
         .grad-text{background:linear-gradient(100deg,#15634f,#1a7a61,#c6692f,#15634f);background-size:240% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradPan 7s ease infinite}
       `}</style>
 
-     
+      {/* hero */}
       <section className="relative">
-        
+        {/* aurora blobs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
           <div className="absolute -top-24 -left-16 w-[34rem] h-[34rem] rounded-full" style={{ background: "radial-gradient(circle,#15634f33,transparent 60%)", filter: "blur(40px)", animation: "aurora 14s ease-in-out infinite" }} />
           <div className="absolute top-10 -right-24 w-[30rem] h-[30rem] rounded-full" style={{ background: "radial-gradient(circle,#c6692f2e,transparent 60%)", filter: "blur(50px)", animation: "aurora2 16s ease-in-out infinite" }} />
@@ -129,7 +128,7 @@ export default function Landing() {
               </div>
             </div>
 
-         
+            {/* resume mockup with glow + float */}
             <div className="relative h-[470px] hidden lg:block">
               <div className="absolute inset-6 rounded-3xl" style={{ background: "radial-gradient(circle at 50% 40%,#15634f33,transparent 70%)", filter: "blur(30px)" }} />
               <div className="absolute inset-0 origin-top" style={{ animation: "floatY 6s ease-in-out infinite" }}>
@@ -144,7 +143,7 @@ export default function Landing() {
           </div>
         </div>
 
-      
+        {/* scrolling skill marquee */}
         <div className="relative border-y border-line bg-card/60 py-3.5 overflow-hidden">
           <div className="flex gap-3 w-max" style={{ animation: "marquee 24s linear infinite" }}>
             {[...skills, ...skills].map((s, i) => (
@@ -156,10 +155,10 @@ export default function Landing() {
         </div>
       </section>
 
-     
+      {/* stats */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 py-12">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[["4", 4, "", "Templates"], ["7", 7, "", "Compiler languages"], ["70", 70, "+", "DSA problems"], ["100", 100, "%", "Free to start"]].map(([_, to, suffix, label], i) => (
+          {[["8", 8, "", "Templates"], ["7", 7, "", "Compiler languages"], ["75", 75, "+", "DSA problems"], ["100", 100, "%", "Free to start"]].map(([_, to, suffix, label], i) => (
             <Reveal key={label} delay={i * 80} className="rounded-2xl border border-line bg-card p-5 text-center hover:shadow-md transition">
               <div className="font-display text-3xl sm:text-4xl font-semibold text-brand"><CountUp to={to} suffix={suffix} /></div>
               <div className="text-xs sm:text-sm text-ink2 mt-1">{label}</div>
@@ -168,7 +167,7 @@ export default function Landing() {
         </div>
       </section>
 
-      
+      {/* features */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 pb-16">
         <Reveal className="text-center mb-9">
           <h2 className="font-display text-3xl font-semibold">Everything you need to land the interview</h2>
@@ -191,7 +190,7 @@ export default function Landing() {
         </div>
       </section>
 
-     
+      {/* how it works */}
       <section className="bg-card border-y border-line">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14">
           <Reveal className="text-center mb-9">
@@ -213,11 +212,11 @@ export default function Landing() {
         </div>
       </section>
 
-     
+      {/* template showcase */}
       <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
         <Reveal className="text-center mb-9">
           <h2 className="font-display text-3xl font-semibold">One resume, every style</h2>
-          <p className="text-ink2 mt-2 max-w-lg mx-auto">Switch between 7 polished templates instantly — your content stays, only the look changes.</p>
+          <p className="text-ink2 mt-2 max-w-lg mx-auto">Switch between 8 polished templates instantly — your content stays, only the look changes.</p>
         </Reveal>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[{ key: "classic", label: "Classic" }, { key: "modern", label: "Modern" }, { key: "professional", label: "Professional" }].map((t, i) => (

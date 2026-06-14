@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import EditorPkg from "react-simple-code-editor";
 const Editor = EditorPkg?.default || EditorPkg; 
@@ -23,7 +24,7 @@ const LANGS = [
   { key: "csharp", label: "C#", engine: "godbolt", prism: "csharp", sample: 'using System;\n\nclass Program {\n    static void Main() {\n        Console.WriteLine("Hello, world!");\n    }\n}' },
 ];
 
-
+/* ---- JavaScript: sandboxed Web Worker ---- */
 const WORKER_SRC = `
   const _out = [];
   const _fmt = (a) => { try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch (e) { return String(a); } };
@@ -49,7 +50,7 @@ function runJS(code, stdin) {
   });
 }
 
-
+/* ---- Python: Pyodide ---- */
 const PYODIDE_VER = "v0.26.4";
 function loadScript(src) {
   return new Promise((res, rej) => {
@@ -91,7 +92,7 @@ async function runPython(code, stdin) {
   return { stdout: String(py.globals.get("_result") || ""), stderr: "" };
 }
 
-
+/* ---- C / C++ / Go: Wandbox (free public compiler) ---- */
 let wandboxListPromise;
 function wandboxList() {
   if (!wandboxListPromise) wandboxListPromise = fetch("https://wandbox.org/api/list.json").then((r) => r.json());
@@ -117,7 +118,7 @@ async function runWandbox(langKey, code, stdin) {
   return { stdout: d.program_output || "", stderr };
 }
 
-
+/* ---- Java / C#: Compiler Explorer (godbolt) — free, no key ---- */
 const GODBOLT = "https://godbolt.org/api";
 const _gbCache = {};
 async function gbCompiler(lang) {
@@ -154,9 +155,10 @@ async function runGodbolt(lang, code, stdin) {
   return { stdout, stderr: [compileErr, runErr].filter(Boolean).join("\n") };
 }
 
-export default function CodeRunner() {
-  const [langKey, setLangKey] = useState("javascript");
-  const [code, setCode] = useState(LANGS[0].sample);
+export default function CodeRunner({ initialCode, initialLangKey } = {}) {
+  const startKey = initialLangKey && LANGS.some((l) => l.key === initialLangKey) ? initialLangKey : "javascript";
+  const [langKey, setLangKey] = useState(startKey);
+  const [code, setCode] = useState(initialCode ?? (LANGS.find((l) => l.key === startKey)?.sample || LANGS[0].sample));
   const [stdin, setStdin] = useState("");
   const [out, setOut] = useState(null);
   const [running, setRunning] = useState(false);
