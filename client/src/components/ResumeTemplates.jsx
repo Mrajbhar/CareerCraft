@@ -23,8 +23,14 @@ export function ResumeStyles() {
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href =
-      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Lato:wght@400;700&family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap";
+      "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Lato:wght@400;700&family=Playfair+Display:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Merriweather:wght@400;700&family=EB+Garamond:wght@400;500;600;700&family=Source+Serif+4:wght@400;600;700&family=Libre+Baskerville:wght@400;700&family=Bitter:wght@400;600;700&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600;700&family=Montserrat:wght@400;500;600;700&family=Raleway:wght@400;500;600;700&family=Work+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap";
     document.head.appendChild(link);
+    // Computer Modern (the default LaTeX serif) — used by the Executive template
+    const cm = document.createElement("link");
+    cm.rel = "stylesheet";
+    cm.href =
+      "https://cdn.jsdelivr.net/gh/vsalvino/computer-modern@main/fonts/serif.css";
+    document.head.appendChild(cm);
     const style = document.createElement("style");
     style.id = "careercraft-styles";
     style.textContent = `
@@ -99,12 +105,136 @@ export const FONTS = [
       "Charter, 'Charter BT', 'PT Serif', Georgia, 'Times New Roman', serif",
     sans: "Charter, 'Charter BT', 'PT Serif', Georgia, 'Times New Roman', serif",
   },
+  {
+    id: "cmserif",
+    label: "Computer Modern",
+    serif:
+      "'Computer Modern Serif', 'Latin Modern Roman', 'PT Serif', Georgia, serif",
+    sans: "'Computer Modern Serif', 'Latin Modern Roman', 'PT Serif', Georgia, serif",
+  },
+  {
+    id: "merriweather",
+    label: "merriweather",
+    serif: "'Merriweather', Georgia, serif",
+    sans: "'Merriweather', Georgia, serif",
+  },
+  {
+    id: "ebgaramond",
+    label: "ebgaramond",
+    serif: "'EB Garamond', Garamond, Georgia, serif",
+    sans: "'EB Garamond', Garamond, Georgia, serif",
+  },
+  {
+    id: "sourceserif",
+    label: "sourceserif",
+    serif: "'Source Serif 4', Georgia, serif",
+    sans: "'Source Serif 4', Georgia, serif",
+  },
+  {
+    id: "baskerville",
+    label: "baskerville",
+    serif: "'Libre Baskerville', Baskerville, Georgia, serif",
+    sans: "'Libre Baskerville', Baskerville, Georgia, serif",
+  },
+  {
+    id: "bitter",
+    label: "bitter",
+    serif: "'Bitter', Georgia, serif",
+    sans: "'Bitter', Georgia, serif",
+  },
+  {
+    id: "roboto",
+    label: "roboto",
+    serif: "'Roboto', Arial, sans-serif",
+    sans: "'Roboto', Arial, sans-serif",
+  },
+  {
+    id: "opensans",
+    label: "opensans",
+    serif: "'Open Sans', Arial, sans-serif",
+    sans: "'Open Sans', Arial, sans-serif",
+  },
+  {
+    id: "montserrat",
+    label: "montserrat",
+    serif: "'Montserrat', 'Helvetica Neue', Arial, sans-serif",
+    sans: "'Montserrat', 'Helvetica Neue', Arial, sans-serif",
+  },
+  {
+    id: "raleway",
+    label: "raleway",
+    serif: "'Raleway', 'Helvetica Neue', Arial, sans-serif",
+    sans: "'Raleway', 'Helvetica Neue', Arial, sans-serif",
+  },
+  {
+    id: "worksans",
+    label: "worksans",
+    serif: "'Work Sans', 'Helvetica Neue', Arial, sans-serif",
+    sans: "'Work Sans', 'Helvetica Neue', Arial, sans-serif",
+  },
+  {
+    id: "sourcesans",
+    label: "sourcesans",
+    serif: "'Source Sans 3', Arial, sans-serif",
+    sans: "'Source Sans 3', Arial, sans-serif",
+  },
+  {
+    id: "plexsans",
+    label: "plexsans",
+    serif: "'IBM Plex Sans', Arial, sans-serif",
+    sans: "'IBM Plex Sans', Arial, sans-serif",
+  },
+  {
+    id: "plexmono",
+    label: "plexmono",
+    serif: "'IBM Plex Mono', 'Courier New', monospace",
+    sans: "'IBM Plex Mono', 'Courier New', monospace",
+  },
+  {
+    id: "jetbrains",
+    label: "jetbrains",
+    serif: "'JetBrains Mono', 'Courier New', monospace",
+    sans: "'JetBrains Mono', 'Courier New', monospace",
+  },
 ];
 const FONT_MAP = Object.fromEntries(FONTS.map((f) => [f.id, f]));
 const fontVars = (r) => {
   const f = FONT_MAP[(r && r.font) || "classic"] || FONTS[0];
-  return { "--rz-serif": f.serif, "--rz-sans": f.sans };
+  return {
+    "--rz-serif": f.serif,
+    "--rz-sans": f.sans,
+    "--rz-fs": (r && r.scale) || 1,
+  };
 };
+
+// Options shown in the Builder's "Font" picker. id "" = use the template's own default font.
+export const FONT_CHOICES = [
+  { id: "", label: "Template default" },
+  { id: "cmserif", label: "Computer Modern (LaTeX)" },
+  { id: "ptserif", label: "Charter (serif)" },
+  { id: "classic", label: "Fraunces (serif)" },
+  { id: "lora", label: "Lora (serif)" },
+  { id: "playfair", label: "Playfair Display (serif)" },
+  { id: "georgia", label: "Georgia (serif)" },
+  { id: "poppins", label: "Poppins (sans)" },
+  { id: "inter", label: "Inter (sans)" },
+  { id: "lato", label: "Lato (sans)" },
+  { id: "hanken", label: "Hanken Grotesk (sans)" },
+  { id: "merriweather", label: "Merriweather (serif)" },
+  { id: "ebgaramond", label: "EB Garamond (serif)" },
+  { id: "sourceserif", label: "Source Serif (serif)" },
+  { id: "baskerville", label: "Libre Baskerville (serif)" },
+  { id: "bitter", label: "Bitter (serif)" },
+  { id: "roboto", label: "Roboto (sans)" },
+  { id: "opensans", label: "Open Sans (sans)" },
+  { id: "montserrat", label: "Montserrat (sans)" },
+  { id: "raleway", label: "Raleway (sans)" },
+  { id: "worksans", label: "Work Sans (sans)" },
+  { id: "sourcesans", label: "Source Sans (sans)" },
+  { id: "plexsans", label: "IBM Plex Sans (sans)" },
+  { id: "plexmono", label: "IBM Plex Mono (mono)" },
+  { id: "jetbrains", label: "JetBrains Mono (mono)" },
+];
 
 /* ---------- shared content blocks (used by both templates) ---------- */
 const body = { fontFamily: "var(--rz-sans, 'Hanken Grotesk', sans-serif)" };
@@ -118,7 +248,7 @@ const Bullets = ({ text }) =>
         margin: "4px 0 0",
         paddingLeft: 18,
         listStyleType: "disc",
-        fontSize: 13,
+        fontSize: "calc(13px * var(--rz-fs, 1))",
         lineHeight: 1.55,
         color: C.soft,
       }}
@@ -138,14 +268,30 @@ const ExperienceItem = ({ e }) => (
         alignItems: "baseline",
       }}
     >
-      <strong style={{ ...serif, fontSize: 14.5 }}>
+      <strong style={{ ...serif, fontSize: "calc(14.5px * var(--rz-fs, 1))" }}>
         {e.role}
         {e.company && <span style={{ fontWeight: 400 }}> · {e.company}</span>}
       </strong>
-      <span style={{ ...body, fontSize: 12, color: C.mute }}>{e.period}</span>
+      <span
+        style={{
+          ...body,
+          fontSize: "calc(12px * var(--rz-fs, 1))",
+          color: C.mute,
+        }}
+      >
+        {e.period}
+      </span>
     </div>
     {e.location && (
-      <div style={{ ...body, fontSize: 12, color: C.mute }}>{e.location}</div>
+      <div
+        style={{
+          ...body,
+          fontSize: "calc(12px * var(--rz-fs, 1))",
+          color: C.mute,
+        }}
+      >
+        {e.location}
+      </div>
     )}
     <Bullets text={e.bullets} />
   </div>
@@ -154,20 +300,40 @@ const ExperienceItem = ({ e }) => (
 const ProjectItem = ({ p }) => (
   <div style={{ marginBottom: 9, ...body }}>
     <span>
-      <strong style={{ ...serif, fontSize: 14 }}>{p.name}</strong>
+      <strong style={{ ...serif, fontSize: "calc(14px * var(--rz-fs, 1))" }}>
+        {p.name}
+      </strong>
       {p.tech && (
-        <span style={{ fontSize: 12, color: C.brand, marginLeft: 8 }}>
+        <span
+          style={{
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.brand,
+            marginLeft: 8,
+          }}
+        >
           {p.tech}
         </span>
       )}
       {p.link && (
-        <span style={{ fontSize: 11.5, color: C.mute, marginLeft: 8 }}>
+        <span
+          style={{
+            fontSize: "calc(11.5px * var(--rz-fs, 1))",
+            color: C.mute,
+            marginLeft: 8,
+          }}
+        >
           {p.link}
         </span>
       )}
     </span>
     {p.desc && (
-      <div style={{ fontSize: 13, color: C.soft, lineHeight: 1.5 }}>
+      <div
+        style={{
+          fontSize: "calc(13px * var(--rz-fs, 1))",
+          color: C.soft,
+          lineHeight: 1.5,
+        }}
+      >
         {p.desc}
       </div>
     )}
@@ -181,19 +347,27 @@ const EduItem = ({ e }) => (
       justifyContent: "space-between",
       marginBottom: 6,
       ...body,
-      fontSize: 13,
+      fontSize: "calc(13px * var(--rz-fs, 1))",
     }}
   >
     <span>
       <strong style={serif}>{e.degree}</strong> — {e.school}{" "}
       {e.detail && <em style={{ color: C.mute }}>· {e.detail}</em>}
     </span>
-    <span style={{ color: C.mute, fontSize: 12 }}>{e.period}</span>
+    <span style={{ color: C.mute, fontSize: "calc(12px * var(--rz-fs, 1))" }}>
+      {e.period}
+    </span>
   </div>
 );
 
 const CertItem = ({ c }) => (
-  <div style={{ ...body, fontSize: 13, marginBottom: 4 }}>
+  <div
+    style={{
+      ...body,
+      fontSize: "calc(13px * var(--rz-fs, 1))",
+      marginBottom: 4,
+    }}
+  >
     <strong style={serif}>{c.name}</strong>
     {c.issuer && ` — ${c.issuer}`}
     {c.year && <span style={{ color: C.mute }}> · {c.year}</span>}
@@ -203,7 +377,14 @@ const CertItem = ({ c }) => (
 const SkillGroups = ({ groups }) => (
   <div style={body}>
     {groups.map((g) => (
-      <div key={g.id} style={{ fontSize: 13, marginBottom: 4, color: C.soft }}>
+      <div
+        key={g.id}
+        style={{
+          fontSize: "calc(13px * var(--rz-fs, 1))",
+          marginBottom: 4,
+          color: C.soft,
+        }}
+      >
         {g.category && <strong style={{ color: C.ink }}>{g.category}: </strong>}
         {g.items}
       </div>
@@ -220,14 +401,20 @@ const CustomItem = ({ it }) => (
         alignItems: "baseline",
       }}
     >
-      <strong style={{ ...serif, fontSize: 14 }}>
+      <strong style={{ ...serif, fontSize: "calc(14px * var(--rz-fs, 1))" }}>
         {it.heading}
         {it.subheading && (
           <span style={{ fontWeight: 400 }}> · {it.subheading}</span>
         )}
       </strong>
       {it.period && (
-        <span style={{ ...body, fontSize: 12, color: C.mute }}>
+        <span
+          style={{
+            ...body,
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.mute,
+          }}
+        >
           {it.period}
         </span>
       )}
@@ -240,7 +427,7 @@ const Title = ({ children }) => (
   <h2
     style={{
       ...body,
-      fontSize: 12.5,
+      fontSize: "calc(12.5px * var(--rz-fs, 1))",
       letterSpacing: ".12em",
       textTransform: "uppercase",
       color: C.brand,
@@ -291,7 +478,7 @@ export function ClassicResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...serif,
-        ...fontVars({ font: "classic" }),
+        ...fontVars({ font: r.font || "classic", scale: r.fontScale }),
       }}
     >
       <div
@@ -302,10 +489,18 @@ export function ClassicResume({ r }) {
           marginBottom: 18,
         }}
       >
-        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 600 }}>{r.name}</h1>
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "calc(32px * var(--rz-fs, 1))",
+            fontWeight: 600,
+          }}
+        >
+          {r.name}
+        </h1>
         <div
           style={{
-            fontSize: 15,
+            fontSize: "calc(15px * var(--rz-fs, 1))",
             color: C.brand,
             fontWeight: 600,
             marginTop: 3,
@@ -316,7 +511,7 @@ export function ClassicResume({ r }) {
         <div
           style={{
             ...body,
-            fontSize: 12.5,
+            fontSize: "calc(12.5px * var(--rz-fs, 1))",
             color: C.soft,
             marginTop: 9,
             display: "flex",
@@ -346,7 +541,7 @@ export function ClassicResume({ r }) {
             style={{
               ...body,
               margin: 0,
-              fontSize: 13.5,
+              fontSize: "calc(13.5px * var(--rz-fs, 1))",
               lineHeight: 1.6,
               color: C.soft,
             }}
@@ -396,7 +591,7 @@ export function ClassicResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}
@@ -427,7 +622,7 @@ const SideTitle = ({ children }) => (
   <h3
     style={{
       ...body,
-      fontSize: 11,
+      fontSize: "calc(11px * var(--rz-fs, 1))",
       letterSpacing: ".14em",
       textTransform: "uppercase",
       color: "#9eccbd",
@@ -448,7 +643,7 @@ const MainTitle = ({ children }) => (
   <h2
     style={{
       ...serif,
-      fontSize: 16,
+      fontSize: "calc(16px * var(--rz-fs, 1))",
       color: C.brand,
       margin: "0 0 9px",
       fontWeight: 600,
@@ -471,7 +666,7 @@ const Row = ({ icon: Icon, t }) => (
       display: "flex",
       alignItems: "center",
       gap: 7,
-      fontSize: 12,
+      fontSize: "calc(12px * var(--rz-fs, 1))",
       marginBottom: 6,
       color: "#dcefe7",
     }}
@@ -494,7 +689,7 @@ export function ModernResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "poppins" }),
+        ...fontVars({ font: r.font || "poppins", scale: r.fontScale }),
       }}
     >
       <aside
@@ -508,7 +703,7 @@ export function ModernResume({ r }) {
         <h1
           style={{
             ...serif,
-            fontSize: 25,
+            fontSize: "calc(25px * var(--rz-fs, 1))",
             margin: 0,
             color: "#fff",
             lineHeight: 1.1,
@@ -518,7 +713,7 @@ export function ModernResume({ r }) {
         </h1>
         <div
           style={{
-            fontSize: 13,
+            fontSize: "calc(13px * var(--rz-fs, 1))",
             color: "#bfe0d4",
             marginTop: 6,
             fontWeight: 600,
@@ -536,7 +731,7 @@ export function ModernResume({ r }) {
           {prefs(r).length > 0 && (
             <div
               style={{
-                fontSize: 11,
+                fontSize: "calc(11px * var(--rz-fs, 1))",
                 color: "#bfe0d4",
                 marginTop: 7,
                 lineHeight: 1.4,
@@ -553,7 +748,7 @@ export function ModernResume({ r }) {
                 {g.category && (
                   <div
                     style={{
-                      fontSize: 12,
+                      fontSize: "calc(12px * var(--rz-fs, 1))",
                       fontWeight: 700,
                       color: "#fff",
                       marginBottom: 3,
@@ -567,7 +762,7 @@ export function ModernResume({ r }) {
                     <span
                       key={i}
                       style={{
-                        fontSize: 11,
+                        fontSize: "calc(11px * var(--rz-fs, 1))",
                         padding: "2px 8px",
                         background: "rgba(255,255,255,.14)",
                         borderRadius: 12,
@@ -584,10 +779,21 @@ export function ModernResume({ r }) {
         {has(r.education) && (
           <SideBlock title="Education">
             {clean(r.education).map((e) => (
-              <div key={e.id} style={{ marginBottom: 11, fontSize: 12.5 }}>
+              <div
+                key={e.id}
+                style={{
+                  marginBottom: 11,
+                  fontSize: "calc(12.5px * var(--rz-fs, 1))",
+                }}
+              >
                 <strong style={{ color: "#fff" }}>{e.degree}</strong>
                 <div style={{ color: "#bfe0d4" }}>{e.school}</div>
-                <div style={{ color: "#9eccbd", fontSize: 11 }}>
+                <div
+                  style={{
+                    color: "#9eccbd",
+                    fontSize: "calc(11px * var(--rz-fs, 1))",
+                  }}
+                >
                   {e.period} {e.detail && `· ${e.detail}`}
                 </div>
               </div>
@@ -597,7 +803,13 @@ export function ModernResume({ r }) {
         {has(r.certifications) && (
           <SideBlock title="Certifications">
             {clean(r.certifications).map((c) => (
-              <div key={c.id} style={{ marginBottom: 7, fontSize: 12 }}>
+              <div
+                key={c.id}
+                style={{
+                  marginBottom: 7,
+                  fontSize: "calc(12px * var(--rz-fs, 1))",
+                }}
+              >
                 <strong style={{ color: "#fff" }}>{c.name}</strong>
                 <div style={{ color: "#bfe0d4" }}>
                   {c.issuer} {c.year && `· ${c.year}`}
@@ -613,7 +825,7 @@ export function ModernResume({ r }) {
             <p
               style={{
                 margin: 0,
-                fontSize: 13.5,
+                fontSize: "calc(13.5px * var(--rz-fs, 1))",
                 lineHeight: 1.6,
                 color: C.soft,
               }}
@@ -643,7 +855,7 @@ export function ModernResume({ r }) {
                 margin: 0,
                 paddingLeft: 18,
                 listStyleType: "disc",
-                fontSize: 13,
+                fontSize: "calc(13px * var(--rz-fs, 1))",
                 lineHeight: 1.55,
                 color: C.soft,
               }}
@@ -675,7 +887,7 @@ const ProTitle = ({ children }) => (
   <h2
     style={{
       ...body,
-      fontSize: 12,
+      fontSize: "calc(12px * var(--rz-fs, 1))",
       letterSpacing: ".14em",
       textTransform: "uppercase",
       color: C.ink,
@@ -708,7 +920,7 @@ export function ProfessionalResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "lora" }),
+        ...fontVars({ font: r.font || "lora", scale: r.fontScale }),
       }}
     >
       <div>
@@ -716,7 +928,7 @@ export function ProfessionalResume({ r }) {
           style={{
             ...serif,
             margin: 0,
-            fontSize: 34,
+            fontSize: "calc(34px * var(--rz-fs, 1))",
             fontWeight: 700,
             letterSpacing: "-.01em",
           }}
@@ -725,7 +937,7 @@ export function ProfessionalResume({ r }) {
         </h1>
         <div
           style={{
-            fontSize: 15,
+            fontSize: "calc(15px * var(--rz-fs, 1))",
             color: C.brand,
             fontWeight: 600,
             marginTop: 2,
@@ -736,7 +948,7 @@ export function ProfessionalResume({ r }) {
       </div>
       <div
         style={{
-          fontSize: 12.5,
+          fontSize: "calc(12.5px * var(--rz-fs, 1))",
           color: C.soft,
           display: "flex",
           flexWrap: "wrap",
@@ -763,7 +975,7 @@ export function ProfessionalResume({ r }) {
           <p
             style={{
               margin: 0,
-              fontSize: 13.5,
+              fontSize: "calc(13.5px * var(--rz-fs, 1))",
               lineHeight: 1.6,
               color: C.soft,
             }}
@@ -812,7 +1024,7 @@ export function ProfessionalResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}
@@ -843,7 +1055,7 @@ const StdTitle = ({ children }) => (
   <h2
     style={{
       ...body,
-      fontSize: 12.5,
+      fontSize: "calc(12.5px * var(--rz-fs, 1))",
       letterSpacing: ".10em",
       textTransform: "uppercase",
       color: C.ink,
@@ -867,9 +1079,17 @@ const StdExp = ({ e }) => (
       }}
     >
       <div>
-        <strong style={{ ...serif, fontSize: 14 }}>{e.role}</strong>
+        <strong style={{ ...serif, fontSize: "calc(14px * var(--rz-fs, 1))" }}>
+          {e.role}
+        </strong>
         {e.company && (
-          <div style={{ ...body, fontSize: 13, color: C.soft }}>
+          <div
+            style={{
+              ...body,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
+              color: C.soft,
+            }}
+          >
             {e.company}
           </div>
         )}
@@ -878,7 +1098,7 @@ const StdExp = ({ e }) => (
         style={{
           textAlign: "right",
           ...body,
-          fontSize: 12,
+          fontSize: "calc(12px * var(--rz-fs, 1))",
           color: C.mute,
           minWidth: 110,
           flexShrink: 0,
@@ -894,20 +1114,43 @@ const StdExp = ({ e }) => (
 const StdProj = ({ p }) => (
   <div style={{ marginBottom: 9 }}>
     <span>
-      <strong style={{ ...serif, fontSize: 14 }}>{p.name}</strong>
+      <strong style={{ ...serif, fontSize: "calc(14px * var(--rz-fs, 1))" }}>
+        {p.name}
+      </strong>
       {p.link && (
-        <span style={{ ...body, fontSize: 12, color: C.brand, marginLeft: 8 }}>
+        <span
+          style={{
+            ...body,
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.brand,
+            marginLeft: 8,
+          }}
+        >
           {p.link}
         </span>
       )}
       {p.tech && (
-        <span style={{ ...body, fontSize: 12, color: C.mute, marginLeft: 8 }}>
+        <span
+          style={{
+            ...body,
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.mute,
+            marginLeft: 8,
+          }}
+        >
           {p.tech}
         </span>
       )}
     </span>
     {p.desc && (
-      <div style={{ ...body, fontSize: 13, color: C.soft, lineHeight: 1.5 }}>
+      <div
+        style={{
+          ...body,
+          fontSize: "calc(13px * var(--rz-fs, 1))",
+          color: C.soft,
+          lineHeight: 1.5,
+        }}
+      >
         {p.desc}
       </div>
     )}
@@ -921,7 +1164,7 @@ const StdSkills = ({ groups }) => (
         style={{
           display: "flex",
           gap: 12,
-          fontSize: 13,
+          fontSize: "calc(13px * var(--rz-fs, 1))",
           marginBottom: 5,
           color: C.soft,
         }}
@@ -948,7 +1191,7 @@ const StdEdu = ({ e }) => (
       justifyContent: "space-between",
       marginBottom: 6,
       ...body,
-      fontSize: 13,
+      fontSize: "calc(13px * var(--rz-fs, 1))",
       gap: 12,
     }}
   >
@@ -961,7 +1204,7 @@ const StdEdu = ({ e }) => (
       style={{
         textAlign: "right",
         color: C.mute,
-        fontSize: 12,
+        fontSize: "calc(12px * var(--rz-fs, 1))",
         minWidth: 110,
         flexShrink: 0,
       }}
@@ -989,19 +1232,37 @@ export function StandardResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "georgia" }),
+        ...fontVars({ font: r.font || "georgia", scale: r.fontScale }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 4 }}>
-        <h1 style={{ ...serif, margin: 0, fontSize: 28, fontWeight: 700 }}>
+        <h1
+          style={{
+            ...serif,
+            margin: 0,
+            fontSize: "calc(28px * var(--rz-fs, 1))",
+            fontWeight: 700,
+          }}
+        >
           {r.name}
         </h1>
         <div
-          style={{ fontSize: 14, color: C.soft, fontWeight: 600, marginTop: 2 }}
+          style={{
+            fontSize: "calc(14px * var(--rz-fs, 1))",
+            color: C.soft,
+            fontWeight: 600,
+            marginTop: 2,
+          }}
         >
           {r.title}
         </div>
-        <div style={{ fontSize: 12, color: C.soft, marginTop: 7 }}>
+        <div
+          style={{
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.soft,
+            marginTop: 7,
+          }}
+        >
           {parts.map((p, i) => (
             <span key={i}>
               {i > 0 && (
@@ -1019,7 +1280,12 @@ export function StandardResume({ r }) {
         <>
           <StdTitle>Summary</StdTitle>
           <p
-            style={{ margin: 0, fontSize: 13, lineHeight: 1.55, color: C.soft }}
+            style={{
+              margin: 0,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
+              lineHeight: 1.55,
+              color: C.soft,
+            }}
           >
             {r.summary}
           </p>
@@ -1071,7 +1337,7 @@ export function StandardResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}
@@ -1103,7 +1369,7 @@ const MinTitle = ({ children }) => (
   <h2
     style={{
       ...body,
-      fontSize: 11.5,
+      fontSize: "calc(11.5px * var(--rz-fs, 1))",
       letterSpacing: ".2em",
       textTransform: "uppercase",
       color: C.mute,
@@ -1134,26 +1400,32 @@ export function MinimalResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "inter" }),
+        ...fontVars({ font: r.font || "inter", scale: r.fontScale }),
       }}
     >
       <h1
         style={{
           ...serif,
           margin: 0,
-          fontSize: 30,
+          fontSize: "calc(30px * var(--rz-fs, 1))",
           fontWeight: 600,
           letterSpacing: "-.01em",
         }}
       >
         {r.name}
       </h1>
-      <div style={{ fontSize: 14.5, color: C.soft, marginTop: 3 }}>
+      <div
+        style={{
+          fontSize: "calc(14.5px * var(--rz-fs, 1))",
+          color: C.soft,
+          marginTop: 3,
+        }}
+      >
         {r.title}
       </div>
       <div
         style={{
-          fontSize: 12.5,
+          fontSize: "calc(12.5px * var(--rz-fs, 1))",
           color: C.mute,
           marginTop: 10,
           marginBottom: 24,
@@ -1177,7 +1449,7 @@ export function MinimalResume({ r }) {
           <p
             style={{
               margin: 0,
-              fontSize: 13.5,
+              fontSize: "calc(13.5px * var(--rz-fs, 1))",
               lineHeight: 1.65,
               color: C.soft,
             }}
@@ -1226,7 +1498,7 @@ export function MinimalResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}
@@ -1257,7 +1529,7 @@ const ElegTitle = ({ children }) => (
   <h2
     style={{
       ...serif,
-      fontSize: 15,
+      fontSize: "calc(15px * var(--rz-fs, 1))",
       textAlign: "center",
       color: C.ink,
       fontWeight: 600,
@@ -1308,16 +1580,23 @@ export function ElegantResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "playfair" }),
+        ...fontVars({ font: r.font || "playfair", scale: r.fontScale }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 22 }}>
-        <h1 style={{ ...serif, margin: 0, fontSize: 34, fontWeight: 700 }}>
+        <h1
+          style={{
+            ...serif,
+            margin: 0,
+            fontSize: "calc(34px * var(--rz-fs, 1))",
+            fontWeight: 700,
+          }}
+        >
           {r.name}
         </h1>
         <div
           style={{
-            fontSize: 14,
+            fontSize: "calc(14px * var(--rz-fs, 1))",
             color: C.brand,
             fontWeight: 600,
             marginTop: 4,
@@ -1327,7 +1606,13 @@ export function ElegantResume({ r }) {
         >
           {r.title}
         </div>
-        <div style={{ fontSize: 12.5, color: C.soft, marginTop: 9 }}>
+        <div
+          style={{
+            fontSize: "calc(12.5px * var(--rz-fs, 1))",
+            color: C.soft,
+            marginTop: 9,
+          }}
+        >
           {parts.map((p, i) => (
             <span key={i}>
               {i > 0 && (
@@ -1348,7 +1633,7 @@ export function ElegantResume({ r }) {
           <p
             style={{
               margin: 0,
-              fontSize: 13.5,
+              fontSize: "calc(13.5px * var(--rz-fs, 1))",
               lineHeight: 1.65,
               color: C.soft,
               textAlign: "center",
@@ -1400,7 +1685,7 @@ export function ElegantResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}
@@ -1431,7 +1716,7 @@ const CompTitle = ({ children }) => (
   <h2
     style={{
       ...body,
-      fontSize: 11.5,
+      fontSize: "calc(11.5px * var(--rz-fs, 1))",
       letterSpacing: ".08em",
       textTransform: "uppercase",
       color: C.ink,
@@ -1463,9 +1748,9 @@ export function CompactResume({ r }) {
         padding: "36px 42px",
         color: C.ink,
         minHeight: 600,
-        fontSize: 12.5,
+        fontSize: "calc(12.5px * var(--rz-fs, 1))",
         ...body,
-        ...fontVars({ font: "lato" }),
+        ...fontVars({ font: r.font || "lato", scale: r.fontScale }),
       }}
     >
       <div
@@ -1479,16 +1764,29 @@ export function CompactResume({ r }) {
         }}
       >
         <div>
-          <h1 style={{ ...serif, margin: 0, fontSize: 24, fontWeight: 700 }}>
+          <h1
+            style={{
+              ...serif,
+              margin: 0,
+              fontSize: "calc(24px * var(--rz-fs, 1))",
+              fontWeight: 700,
+            }}
+          >
             {r.name}
           </h1>
-          <div style={{ fontSize: 13, color: C.brand, fontWeight: 600 }}>
+          <div
+            style={{
+              fontSize: "calc(13px * var(--rz-fs, 1))",
+              color: C.brand,
+              fontWeight: 600,
+            }}
+          >
             {r.title}
           </div>
         </div>
         <div
           style={{
-            fontSize: 11.5,
+            fontSize: "calc(11.5px * var(--rz-fs, 1))",
             color: C.soft,
             textAlign: "right",
             lineHeight: 1.5,
@@ -1505,7 +1803,13 @@ export function CompactResume({ r }) {
         </div>
       </div>
       {prefs(r).length > 0 && (
-        <div style={{ fontSize: 11.5, color: C.mute, marginBottom: 10 }}>
+        <div
+          style={{
+            fontSize: "calc(11.5px * var(--rz-fs, 1))",
+            color: C.mute,
+            marginBottom: 10,
+          }}
+        >
           Open to: {prefs(r).join(" · ")}
         </div>
       )}
@@ -1514,7 +1818,7 @@ export function CompactResume({ r }) {
           <p
             style={{
               margin: 0,
-              fontSize: 12.5,
+              fontSize: "calc(12.5px * var(--rz-fs, 1))",
               lineHeight: 1.5,
               color: C.soft,
             }}
@@ -1563,7 +1867,7 @@ export function CompactResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 12.5,
+              fontSize: "calc(12.5px * var(--rz-fs, 1))",
               lineHeight: 1.5,
               color: C.soft,
             }}
@@ -1594,7 +1898,7 @@ const ExecTitle = ({ children }) => (
   <h2
     style={{
       ...serif,
-      fontSize: 14,
+      fontSize: "calc(14px * var(--rz-fs, 1))",
       letterSpacing: ".06em",
       fontVariant: "small-caps",
       textTransform: "none",
@@ -1624,11 +1928,18 @@ const ExecExp = ({ e }) => (
         gap: 12,
       }}
     >
-      <strong style={{ ...serif, fontSize: 14.5 }}>
+      <strong style={{ ...serif, fontSize: "calc(14.5px * var(--rz-fs, 1))" }}>
         {e.company || e.role}
       </strong>
       {e.period && (
-        <span style={{ ...body, fontSize: 12, color: C.mute, flexShrink: 0 }}>
+        <span
+          style={{
+            ...body,
+            fontSize: "calc(12px * var(--rz-fs, 1))",
+            color: C.mute,
+            flexShrink: 0,
+          }}
+        >
           {e.period}
         </span>
       )}
@@ -1640,14 +1951,20 @@ const ExecExp = ({ e }) => (
           justifyContent: "space-between",
           gap: 12,
           ...body,
-          fontSize: 13,
+          fontSize: "calc(13px * var(--rz-fs, 1))",
         }}
       >
         <span style={{ color: C.soft, fontWeight: 600 }}>
           {e.company ? e.role : ""}
         </span>
         {e.location && (
-          <span style={{ color: C.mute, fontSize: 12, flexShrink: 0 }}>
+          <span
+            style={{
+              color: C.mute,
+              fontSize: "calc(12px * var(--rz-fs, 1))",
+              flexShrink: 0,
+            }}
+          >
             {e.location}
           </span>
         )}
@@ -1663,7 +1980,7 @@ const ExecEdu = ({ e }) => (
       justifyContent: "space-between",
       marginBottom: 6,
       ...body,
-      fontSize: 13,
+      fontSize: "calc(13px * var(--rz-fs, 1))",
       gap: 12,
     }}
   >
@@ -1672,11 +1989,77 @@ const ExecEdu = ({ e }) => (
       {e.degree && <span style={{ color: C.soft }}> — {e.degree}</span>}
       {e.detail && <em style={{ color: C.mute }}> · {e.detail}</em>}
     </span>
-    <span style={{ color: C.mute, fontSize: 12, flexShrink: 0 }}>
+    <span
+      style={{
+        color: C.mute,
+        fontSize: "calc(12px * var(--rz-fs, 1))",
+        flexShrink: 0,
+      }}
+    >
       {e.period}
     </span>
   </div>
 );
+
+/* small inline icons for the Executive contact row (inline SVG so they survive PDF export) */
+const ExecIcon = ({ children }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="11"
+    height="11"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    style={{ flexShrink: 0, marginRight: 4 }}
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);
+const IcoPhone = () => (
+  <ExecIcon>
+    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" />
+  </ExecIcon>
+);
+const IcoMail = () => (
+  <ExecIcon>
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="m22 7-10 5L2 7" />
+  </ExecIcon>
+);
+const IcoPin = () => (
+  <ExecIcon>
+    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+    <circle cx="12" cy="10" r="3" />
+  </ExecIcon>
+);
+const IcoGlobe = () => (
+  <ExecIcon>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M2 12h20" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z" />
+  </ExecIcon>
+);
+const IcoLink = () => (
+  <ExecIcon>
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </ExecIcon>
+);
+const execIco = (k) =>
+  k === "phone" ? (
+    <IcoPhone />
+  ) : k === "mail" ? (
+    <IcoMail />
+  ) : k === "pin" ? (
+    <IcoPin />
+  ) : k === "globe" ? (
+    <IcoGlobe />
+  ) : (
+    <IcoLink />
+  );
 
 export function ExecutiveResume({ r }) {
   const links = r.links || [];
@@ -1686,18 +2069,27 @@ export function ExecutiveResume({ r }) {
     contact.push({
       t: r.phone,
       href: `tel:${r.phone.replace(/[^\d+]/g, "")}`,
-      brand: true,
+      color: C.brand,
+      ic: "phone",
     });
   if (r.email)
-    contact.push({ t: r.email, href: `mailto:${r.email}`, brand: true });
-  if (loc(r)) contact.push({ t: loc(r), href: null, brand: false });
-  links.forEach((l) =>
+    contact.push({
+      t: r.email,
+      href: `mailto:${r.email}`,
+      color: C.brand,
+      ic: "mail",
+    });
+  if (loc(r)) contact.push({ t: loc(r), href: null, color: C.soft, ic: "pin" });
+  links.forEach((l) => {
+    const s = `${l.label || ""} ${l.url || ""}`.toLowerCase();
+    const ic = /portfolio|website|\bsite\b|globe/.test(s) ? "globe" : "link";
     contact.push({
       t: l.label || l.url,
       href: href(l.url || l.label),
-      brand: true,
-    }),
-  );
+      color: C.brand,
+      ic,
+    });
+  });
   return (
     <div
       id="resume-paper"
@@ -1709,7 +2101,7 @@ export function ExecutiveResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: "ptserif" }),
+        ...fontVars({ font: r.font || "cmserif", scale: r.fontScale }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 18 }}>
@@ -1717,7 +2109,7 @@ export function ExecutiveResume({ r }) {
           style={{
             ...serif,
             margin: 0,
-            fontSize: 30,
+            fontSize: "calc(30px * var(--rz-fs, 1))",
             fontWeight: 700,
             fontVariant: "small-caps",
             textTransform: "none",
@@ -1729,7 +2121,7 @@ export function ExecutiveResume({ r }) {
         {r.title && (
           <div
             style={{
-              fontSize: 14,
+              fontSize: "calc(14px * var(--rz-fs, 1))",
               color: C.brand,
               fontWeight: 600,
               marginTop: 3,
@@ -1739,30 +2131,56 @@ export function ExecutiveResume({ r }) {
           </div>
         )}
         {contact.length > 0 && (
-          <div style={{ fontSize: 12, color: C.soft, marginTop: 9 }}>
+          <div
+            style={{
+              fontSize: "calc(12px * var(--rz-fs, 1))",
+              color: C.soft,
+              marginTop: 9,
+              lineHeight: 1.7,
+            }}
+          >
             {contact.map((c, i) => (
-              <span key={i}>
+              <span
+                key={i}
+                style={{ display: "inline-flex", alignItems: "center" }}
+              >
                 {i > 0 && (
                   <span style={{ margin: "0 7px", color: C.mute }}>•</span>
                 )}
-                {c.href ? (
-                  <a
-                    href={c.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ color: C.brand, textDecoration: "none" }}
-                  >
-                    {c.t}
-                  </a>
-                ) : (
-                  <span>{c.t}</span>
-                )}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    color: c.color,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {execIco(c.ic)}
+                  {c.href ? (
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ color: c.color, textDecoration: "none" }}
+                    >
+                      {c.t}
+                    </a>
+                  ) : (
+                    <span>{c.t}</span>
+                  )}
+                </span>
               </span>
             ))}
           </div>
         )}
         {prefs(r).length > 0 && (
-          <div style={{ fontSize: 12, color: C.mute, marginTop: 4 }}>
+          <div
+            style={{
+              fontSize: "calc(12px * var(--rz-fs, 1))",
+              color: C.mute,
+              marginTop: 4,
+            }}
+          >
             Open to: {prefs(r).join(" · ")}
           </div>
         )}
@@ -1772,7 +2190,7 @@ export function ExecutiveResume({ r }) {
           <p
             style={{
               margin: 0,
-              fontSize: 13.5,
+              fontSize: "calc(13.5px * var(--rz-fs, 1))",
               lineHeight: 1.6,
               color: C.soft,
             }}
@@ -1821,7 +2239,7 @@ export function ExecutiveResume({ r }) {
               margin: 0,
               paddingLeft: 18,
               listStyleType: "disc",
-              fontSize: 13,
+              fontSize: "calc(13px * var(--rz-fs, 1))",
               lineHeight: 1.55,
               color: C.soft,
             }}

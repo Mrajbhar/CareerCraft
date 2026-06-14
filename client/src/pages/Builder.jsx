@@ -22,6 +22,8 @@ import {
   Eye,
   PencilLine,
   ArrowLeft,
+  Mail,
+  Copy,
 } from "lucide-react";
 import api from "../api";
 import {
@@ -31,8 +33,14 @@ import {
   Card,
   DownloadBtn,
   BulletEditor,
+  PhoneField,
+  DateRange,
 } from "../components/ui";
-import { ResumeStyles, ResumePreview } from "../components/ResumeTemplates";
+import {
+  ResumeStyles,
+  ResumePreview,
+  FONT_CHOICES,
+} from "../components/ResumeTemplates";
 import { exportPDF, exportWord } from "../lib/exportResume";
 
 const emptyData = {
@@ -96,6 +104,34 @@ const PREFS = [
   ["travel", "Open to Travel"],
   ["onsite", "Open to On-Site"],
 ];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+const monthLabel = (val) => {
+  if (!val) return "";
+  const [y, m] = val.split("-");
+  return m ? `${MONTHS[+m - 1]} ${y}` : y;
+};
+const makePeriod = (from, to, current) => {
+  const f = monthLabel(from);
+  const t = current ? "Present" : monthLabel(to);
+  return f && t ? `${f} - ${t}` : f || t || "";
+};
+const withPeriod = (x) => ({
+  ...x,
+  period: makePeriod(x.from, x.to, x.current),
+});
 
 /* animated accordion section */
 function Acc({
@@ -317,6 +353,13 @@ export default function Builder() {
   const [busy, setBusy] = useState({});
   const [review, setReview] = useState(null);
   const [reviewing, setReviewing] = useState(false);
+  const [coverOpen, setCoverOpen] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
+  const [coverText, setCoverText] = useState("");
+  const [coverJob, setCoverJob] = useState("");
+  const [coverCompany, setCoverCompany] = useState("");
+  const [coverJD, setCoverJD] = useState("");
+  const [copied, setCopied] = useState(false);
   const [openSec, setOpenSec] = useState("personal");
   const [tab, setTab] = useState("edit");
   const first = useRef(true);
@@ -369,6 +412,27 @@ export default function Builder() {
     }));
   const del = (key, iid) =>
     setData((d) => ({ ...d, [key]: d[key].filter((x) => x.id !== iid) }));
+  const updDates = (key, iid, patch) =>
+    setData((d) => ({
+      ...d,
+      [key]: d[key].map((x) =>
+        x.id === iid ? withPeriod({ ...x, ...patch }) : x,
+      ),
+    }));
+  const updCustomDates = (sid, iid, patch) =>
+    setData((d) => ({
+      ...d,
+      custom: d.custom.map((s) =>
+        s.id === sid
+          ? {
+              ...s,
+              items: s.items.map((it) =>
+                it.id === iid ? withPeriod({ ...it, ...patch }) : it,
+              ),
+            }
+          : s,
+      ),
+    }));
   const flag = (k, v) => setBusy((b) => ({ ...b, [k]: v }));
 
   const addCustom = () => {
@@ -393,6 +457,9 @@ export default function Builder() {
                   id: Date.now(),
                   heading: "",
                   subheading: "",
+                  from: "",
+                  to: "",
+                  current: false,
                   period: "",
                   bullets: "",
                 },
@@ -478,11 +545,50 @@ export default function Builder() {
     setReviewing(false);
   };
 
+  const genCover = async () => {
+    setCoverLoading(true);
+    setCoverText("");
+    setCopied(false);
+    try {
+      const res = await api.post("/ai/cover", {
+        data,
+        jobTitle: coverJob,
+        company: coverCompany,
+        jobDescription: coverJD,
+      });
+      setCoverText(res.data.text || "No letter returned.");
+    } catch (err) {
+      alert(
+        err.response?.data?.error ||
+          err.response?.data?.msg ||
+          "Cover letter generation failed.",
+      );
+    }
+    setCoverLoading(false);
+  };
+  const copyCover = () => {
+    navigator.clipboard?.writeText(coverText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  const downloadCover = () => {
+    const blob = new Blob([coverText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${previewData.name || "cover"}-cover-letter.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) return <p style={{ padding: 30 }}>Loading…</p>;
 
   const previewData = {
     ...data,
     name: data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim(),
+    phone: data.phone
+      ? `${data.countryCode || ""} ${data.phone}`.trim()
+      : data.phone,
   };
   const acc = (id2) => ({ id: id2, open: openSec, setOpen: setOpenSec });
 
@@ -528,6 +634,13 @@ export default function Builder() {
               <ClipboardCheck size={15} />
             )}{" "}
             <span className="hidden sm:inline">AI Review</span>
+          </button>
+          <button
+            onClick={() => setCoverOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-white text-ink text-sm font-semibold hover:bg-paper transition shrink-0"
+          >
+            <Mail size={15} />{" "}
+            <span className="hidden sm:inline">Cover Letter</span>
           </button>
         </div>
       </div>
@@ -580,10 +693,11 @@ export default function Builder() {
                 value={data.email}
                 onChange={(v) => set("email", v)}
               />
-              <Field
-                label="Phone Number"
-                value={data.phone}
-                onChange={(v) => set("phone", v)}
+              <PhoneField
+                code={data.countryCode}
+                number={data.phone}
+                onCode={(v) => set("countryCode", v)}
+                onNumber={(v) => set("phone", v)}
               />
             </div>
             <Field
@@ -702,6 +816,9 @@ export default function Builder() {
                     role: "",
                     company: "",
                     location: "",
+                    from: "",
+                    to: "",
+                    current: false,
                     period: "",
                     bullets: "",
                   })
@@ -725,18 +842,18 @@ export default function Builder() {
                     value={e.company}
                     onChange={(v) => upd("experience", e.id, "company", v)}
                   />
-                  <Field
-                    label="Location"
-                    value={e.location}
-                    onChange={(v) => upd("experience", e.id, "location", v)}
-                  />
-                  <Field
-                    label="Period"
-                    value={e.period}
-                    onChange={(v) => upd("experience", e.id, "period", v)}
-                    placeholder="2022 — Present"
-                  />
                 </div>
+                <Field
+                  label="Location"
+                  value={e.location}
+                  onChange={(v) => upd("experience", e.id, "location", v)}
+                />
+                <DateRange
+                  from={e.from}
+                  to={e.to}
+                  current={e.current}
+                  onPatch={(patch) => updDates("experience", e.id, patch)}
+                />
                 <BulletEditor
                   label="Achievements"
                   value={e.bullets}
@@ -834,6 +951,9 @@ export default function Builder() {
                   add("education", {
                     school: "",
                     degree: "",
+                    from: "",
+                    to: "",
+                    current: false,
                     period: "",
                     detail: "",
                   })
@@ -848,18 +968,17 @@ export default function Builder() {
                   value={e.school}
                   onChange={(v) => upd("education", e.id, "school", v)}
                 />
-                <div className="grid grid-cols-2 gap-2.5">
-                  <Field
-                    label="Degree"
-                    value={e.degree}
-                    onChange={(v) => upd("education", e.id, "degree", v)}
-                  />
-                  <Field
-                    label="Period"
-                    value={e.period}
-                    onChange={(v) => upd("education", e.id, "period", v)}
-                  />
-                </div>
+                <Field
+                  label="Degree"
+                  value={e.degree}
+                  onChange={(v) => upd("education", e.id, "degree", v)}
+                />
+                <DateRange
+                  from={e.from}
+                  to={e.to}
+                  current={e.current}
+                  onPatch={(patch) => updDates("education", e.id, patch)}
+                />
                 <Field
                   label="Detail (GPA, honors)"
                   value={e.detail}
@@ -961,10 +1080,11 @@ export default function Builder() {
                       }
                     />
                   </div>
-                  <Field
-                    label="Period"
-                    value={it.period}
-                    onChange={(v) => updCustomItem(sec.id, it.id, "period", v)}
+                  <DateRange
+                    from={it.from}
+                    to={it.to}
+                    current={it.current}
+                    onPatch={(patch) => updCustomDates(sec.id, it.id, patch)}
                   />
                   <BulletEditor
                     label="Details"
@@ -995,25 +1115,102 @@ export default function Builder() {
           className={`${tab === "preview" ? "block" : "hidden"} lg:block lg:flex-1 lg:h-[calc(100vh-140px)] lg:overflow-y-auto px-4 sm:px-6 lg:px-8 py-4`}
         >
           <div className="flex justify-between items-center mb-3 flex-wrap gap-2 w-full max-w-[1100px] mx-auto">
-            <div className="flex gap-1.5 flex-wrap">
-              {[
-                "classic",
-                "modern",
-                "professional",
-                "standard",
-                "minimal",
-                "elegant",
-                "compact",
-                "executive",
-              ].map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTemplate(t)}
-                  className={`px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-ink text-white border-ink" : "bg-white text-ink2 border-line hover:bg-paper"}`}
-                >
-                  {t}
-                </button>
-              ))}
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  "classic",
+                  "modern",
+                  "professional",
+                  "standard",
+                  "minimal",
+                  "elegant",
+                  "compact",
+                  "executive",
+                ].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTemplate(t)}
+                    className={`px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-ink text-white border-ink" : "bg-white text-ink2 border-line hover:bg-paper"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-ink2">Font</span>
+                  <select
+                    value={data.font || ""}
+                    onChange={(e) => set("font", e.target.value)}
+                    className="px-2.5 py-1.5 rounded-lg border border-line bg-white text-ink text-xs font-semibold focus:outline-none focus:border-brand cursor-pointer"
+                  >
+                    {FONT_CHOICES.map((f) => (
+                      <option key={f.id || "default"} value={f.id}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                  {data.font ? (
+                    <button
+                      onClick={() => set("font", "")}
+                      className="text-xs text-ink2 underline hover:text-ink"
+                    >
+                      reset
+                    </button>
+                  ) : null}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-ink2">Size</span>
+                  <div className="flex items-center rounded-lg border border-line bg-white overflow-hidden">
+                    <button
+                      onClick={() =>
+                        set(
+                          "fontScale",
+                          Math.max(
+                            0.8,
+                            Math.round(((data.fontScale || 1) - 0.05) * 100) /
+                              100,
+                          ),
+                        )
+                      }
+                      className="px-2.5 py-1 text-ink2 hover:bg-paper text-sm font-bold"
+                      title="Smaller"
+                    >
+                      −
+                    </button>
+                    <span
+                      className="px-2 text-xs font-semibold text-ink text-center"
+                      style={{ minWidth: 42 }}
+                    >
+                      {Math.round((data.fontScale || 1) * 100)}%
+                    </span>
+                    <button
+                      onClick={() =>
+                        set(
+                          "fontScale",
+                          Math.min(
+                            1.3,
+                            Math.round(((data.fontScale || 1) + 0.05) * 100) /
+                              100,
+                          ),
+                        )
+                      }
+                      className="px-2.5 py-1 text-ink2 hover:bg-paper text-sm font-bold"
+                      title="Bigger"
+                    >
+                      +
+                    </button>
+                  </div>
+                  {data.fontScale && data.fontScale !== 1 ? (
+                    <button
+                      onClick={() => set("fontScale", 1)}
+                      className="text-xs text-ink2 underline hover:text-ink"
+                    >
+                      reset
+                    </button>
+                  ) : null}
+                </div>
+              </div>
             </div>
             <div className="flex gap-2">
               <DownloadBtn
@@ -1062,6 +1259,93 @@ export default function Builder() {
             ) : (
               <div className="whitespace-pre-wrap text-sm leading-relaxed text-ink2">
                 {review}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {coverOpen && (
+        <div
+          onClick={() => !coverLoading && setCoverOpen(false)}
+          className="fixed inset-0 z-50 grid place-items-center p-5"
+          style={{ background: "rgba(0,0,0,.45)" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl w-full max-w-xl max-h-[85vh] overflow-auto p-6 shadow-2xl"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-display text-xl font-semibold flex items-center gap-2">
+                <Mail size={20} className="text-brand" /> AI Cover Letter
+              </h3>
+              <button
+                onClick={() => setCoverOpen(false)}
+                disabled={coverLoading}
+              >
+                <X size={20} className="text-ink2" />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Field
+                label="Target job title"
+                value={coverJob}
+                onChange={setCoverJob}
+                placeholder={data.title || "e.g. Backend Engineer"}
+              />
+              <Field
+                label="Company (optional)"
+                value={coverCompany}
+                onChange={setCoverCompany}
+                placeholder="e.g. HDFC Bank"
+              />
+            </div>
+            <Field
+              area
+              label="Paste the job description (optional — improves tailoring)"
+              value={coverJD}
+              onChange={setCoverJD}
+              placeholder="Paste the job post here…"
+            />
+            <button
+              onClick={genCover}
+              disabled={coverLoading}
+              className="mt-1 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-semibold disabled:opacity-60 hover:bg-brand-dark transition"
+            >
+              {coverLoading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" /> Writing…
+                </>
+              ) : (
+                <>
+                  <Sparkles size={15} />{" "}
+                  {coverText ? "Regenerate" : "Generate cover letter"}
+                </>
+              )}
+            </button>
+
+            {coverText && !coverLoading && (
+              <div className="mt-4">
+                <div
+                  className="rounded-xl border border-line bg-paper/40 p-4 text-sm leading-relaxed text-ink whitespace-pre-wrap"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  {coverText}
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={copyCover}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line text-ink text-sm font-semibold hover:bg-paper transition"
+                  >
+                    <Copy size={15} /> {copied ? "Copied!" : "Copy"}
+                  </button>
+                  <button
+                    onClick={downloadCover}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line text-ink text-sm font-semibold hover:bg-paper transition"
+                  >
+                    <FileText size={15} /> Download .txt
+                  </button>
+                </div>
               </div>
             )}
           </div>

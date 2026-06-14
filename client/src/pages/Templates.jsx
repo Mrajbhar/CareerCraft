@@ -124,8 +124,8 @@ const TEMPLATES = [
   {
     key: "executive",
     label: "Executive",
-    font: "Charter",
-    desc: "Serif with small-caps name & headings — matches a LaTeX-style corporate resume.",
+    font: "Computer Modern",
+    desc: "LaTeX Computer Modern serif, small-caps headings, icon contact row — academic/corporate feel.",
   },
 ];
 
