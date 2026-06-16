@@ -12,6 +12,7 @@ import Prep from "./pages/Prep";
 import Templates from "./pages/Templates";
 import Checker from "./pages/Checker";
 import Todo from "./pages/Todo";
+import Pricing from "./pages/Pricing";
 
 const Private = ({ children }) => {
   const { user } = useAuth();
@@ -30,6 +31,8 @@ function Shell() {
       <main className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/pricing" element={<Pricing />} />
+          {/* login and signup share one component, different start mode */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Login />} />
           <Route path="/reset" element={<Login />} />

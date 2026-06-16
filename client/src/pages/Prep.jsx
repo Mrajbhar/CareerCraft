@@ -1,7 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
+import { useAuth } from "../context/AuthContext";
 import {
   Brain, Code2, MessageSquare, ExternalLink, Terminal, Boxes, Cpu, Rocket,
   Search, Server, Network, Trophy, Layers, Zap, BookOpen, Check, Shuffle, ChevronRight, GraduationCap, X, Building2,
+  Mic, Crown, Send, RotateCcw, Loader2,
 } from "lucide-react";
 import CodeRunner from "../components/CodeRunner";
 import { dsaTheory } from "../data/dsaTheory";
@@ -103,6 +107,38 @@ export default function Prep() {
   const [codeLang, setCodeLang] = useState("Python");
   const [companyQ, setCompanyQ] = useState("");
   const [companyCat, setCompanyCat] = useState("All");
+  const { isPro } = useAuth();
+  const ivNav = useNavigate();
+  const [ivRole, setIvRole] = useState("Software Engineer");
+  const [ivStarted, setIvStarted] = useState(false);
+  const [ivLoading, setIvLoading] = useState(false);
+  const [ivQuestion, setIvQuestion] = useState("");
+  const [ivFeedback, setIvFeedback] = useState("");
+  const [ivAnswer, setIvAnswer] = useState("");
+  const [ivHistory, setIvHistory] = useState([]);
+  const ivErr = (e) => {
+    if (e?.response?.status === 403) { if (window.confirm("Mock Interview is a Pro feature.\n\nSee Pro plans?")) ivNav("/pricing"); return; }
+    alert(e?.response?.data?.error || e?.response?.data?.msg || "Something went wrong. Try again.");
+  };
+  const ivStart = async () => {
+    setIvLoading(true); setIvFeedback(""); setIvHistory([]); setIvQuestion("");
+    try {
+      const { data } = await api.post("/ai/interview", { role: ivRole, start: true });
+      setIvQuestion(data.question || "Tell me about yourself."); setIvStarted(true);
+    } catch (e) { ivErr(e); }
+    setIvLoading(false);
+  };
+  const ivSend = async () => {
+    if (!ivAnswer.trim() || ivLoading) return;
+    const hist = [...ivHistory, { q: ivQuestion, a: ivAnswer }];
+    setIvLoading(true);
+    try {
+      const { data } = await api.post("/ai/interview", { role: ivRole, history: hist, answer: ivAnswer });
+      setIvHistory(hist); setIvFeedback(data.feedback || ""); setIvQuestion(data.question || ""); setIvAnswer("");
+    } catch (e) { ivErr(e); }
+    setIvLoading(false);
+  };
+  const ivReset = () => { setIvStarted(false); setIvQuestion(""); setIvFeedback(""); setIvHistory([]); setIvAnswer(""); };
   // solved problems persist across sessions
   const [solved, setSolved] = useState(() => {
     try { return JSON.parse(localStorage.getItem("craftcv_solved")) || {}; } catch { return {}; }
@@ -140,7 +176,7 @@ export default function Prep() {
 
       {/* tabs */}
       <div className="flex justify-center gap-2 mb-7 flex-wrap">
-        {[["dsa", "DSA Topics", Brain], ["theory", "DSA Course", GraduationCap], ["behavioral", "Behavioral", MessageSquare], ["system", "System Design", Network], ["code", "Code Practice", Code2], ["companies", "Companies", Building2]].map(([k, l, Icon]) => (
+        {[["dsa", "DSA Topics", Brain], ["theory", "DSA Course", GraduationCap], ["interview", "Mock Interview", Mic], ["behavioral", "Behavioral", MessageSquare], ["system", "System Design", Network], ["code", "Code Practice", Code2], ["companies", "Companies", Building2]].map(([k, l, Icon]) => (
           <button key={k} onClick={() => setView(k)}
             className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition ${view === k ? "bg-brand text-white border-brand" : "bg-card text-ink2 border-line hover:bg-paper"}`}>
             <Icon size={16} /> {l}
@@ -251,6 +287,71 @@ export default function Prep() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {view === "interview" && (
+        <div className="max-w-3xl mx-auto">
+          {!isPro ? (
+            <div className="rounded-2xl border border-line bg-card p-8 sm:p-10 text-center">
+              <div className="mx-auto w-14 h-14 grid place-items-center rounded-2xl bg-brand/10 mb-4"><Crown className="text-brand" size={26} /></div>
+              <h3 className="font-display text-2xl font-semibold mb-2">AI Mock Interview <span className="text-xs font-bold bg-brand text-white px-2 py-0.5 rounded-full align-middle">PRO</span></h3>
+              <p className="text-ink2 max-w-md mx-auto mb-6">Practice with an AI interviewer that asks role-specific questions, reacts to your answers, and gives instant feedback — as many rounds as you want.</p>
+              <button onClick={() => ivNav("/pricing")} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand text-white font-semibold hover:bg-brand-dark transition"><Crown size={18} /> Upgrade to Pro</button>
+            </div>
+          ) : !ivStarted ? (
+            <div className="rounded-2xl border border-line bg-card p-6 sm:p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="grid place-items-center w-11 h-11 rounded-xl bg-brand/10"><Mic className="text-brand" size={22} /></div>
+                <div><h3 className="font-display text-xl font-semibold">AI Mock Interview</h3><p className="text-sm text-ink2">Pick a role and start practising.</p></div>
+              </div>
+              <label className="block text-sm font-semibold mb-1.5">Role / position</label>
+              <input value={ivRole} onChange={(e) => setIvRole(e.target.value)} placeholder="e.g. Frontend Developer"
+                className="w-full rounded-xl border border-line bg-paper/50 px-4 py-2.5 text-sm text-ink outline-none focus:border-brand transition mb-4" />
+              <button onClick={ivStart} disabled={ivLoading}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-brand text-white font-semibold disabled:opacity-60 hover:bg-brand-dark transition">
+                {ivLoading ? <><Loader2 size={17} className="animate-spin" /> Starting…</> : <><Mic size={17} /> Start interview</>}
+              </button>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-line bg-card p-5 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-ink2">Mock interview · {ivRole}</span>
+                <button onClick={ivReset} className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink2 hover:text-rust transition"><RotateCcw size={14} /> Restart</button>
+              </div>
+
+              {ivHistory.length > 0 && (
+                <div className="flex flex-col gap-3 mb-4 max-h-64 overflow-auto pr-1">
+                  {ivHistory.map((h, i) => (
+                    <div key={i} className="flex flex-col gap-1.5">
+                      <div className="text-sm"><span className="font-semibold text-brand">Q{i + 1}. </span>{h.q}</div>
+                      <div className="text-sm text-ink2 pl-4 border-l-2 border-line">{h.a}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {ivFeedback && (
+                <div className="rounded-xl bg-brand/5 border border-brand/20 px-4 py-3 mb-4 text-sm">
+                  <span className="font-semibold text-brand">Feedback: </span><span className="text-ink">{ivFeedback}</span>
+                </div>
+              )}
+
+              <div className="rounded-xl border border-line bg-paper/40 px-4 py-3 mb-3">
+                <div className="text-[11px] font-bold uppercase tracking-wide text-ink2 mb-1">Question {ivHistory.length + 1}</div>
+                <div className="text-[15px] font-medium text-ink">{ivLoading && !ivQuestion ? "…" : ivQuestion}</div>
+              </div>
+
+              <textarea value={ivAnswer} onChange={(e) => setIvAnswer(e.target.value)} rows={4} placeholder="Type your answer…"
+                className="w-full rounded-xl border border-line bg-paper/50 px-4 py-3 text-sm text-ink outline-none focus:border-brand transition resize-y" />
+              <div className="flex justify-end mt-2">
+                <button onClick={ivSend} disabled={ivLoading || !ivAnswer.trim()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white font-semibold disabled:opacity-60 hover:bg-brand-dark transition">
+                  {ivLoading ? <><Loader2 size={16} className="animate-spin" /> Thinking…</> : <><Send size={16} /> Submit answer</>}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

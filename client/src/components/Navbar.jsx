@@ -2,7 +2,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import {
   Layers, LayoutDashboard, LogOut, Brain, ClipboardCheck,
-  Menu, X, ChevronDown, LayoutTemplate, ListChecks,
+  Menu, X, ChevronDown, LayoutTemplate, ListChecks, Crown,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
@@ -31,7 +31,7 @@ function Avatar({ user, size = 32 }) {
 }
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isPro } = useAuth();
   const nav = useNavigate();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
@@ -151,11 +151,17 @@ export default function Navbar() {
                       <div className="flex items-center gap-3 p-4 border-b border-line" style={{ background: "rgba(24,168,132,.05)" }}>
                         <Avatar user={user} size={42} />
                         <div className="min-w-0">
-                          <div className="font-semibold truncate">{user.name}</div>
+                          <div className="font-semibold truncate flex items-center gap-1.5">{user.name}{isPro && <span className="text-[9px] font-bold bg-brand text-white px-1.5 py-0.5 rounded-full tracking-wide">PRO</span>}</div>
                           {user.email && <div className="text-xs text-ink2 truncate">{user.email}</div>}
                         </div>
                       </div>
                       <div className="p-1.5">
+                        {!isPro && (
+                          <button onClick={() => nav("/pricing")}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-brand hover:bg-brand/10 transition-colors">
+                            <Crown size={16} /> Upgrade to Pro
+                          </button>
+                        )}
                         <button onClick={() => nav("/dashboard")}
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-ink2 hover:text-ink hover:bg-paper transition-colors">
                           <LayoutDashboard size={16} /> Dashboard
@@ -223,6 +229,11 @@ export default function Navbar() {
                   <Icon size={17} /> {label}
                 </NavLink>
               ))}
+              {!isPro && (
+                <NavLink to="/pricing" className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-brand hover:bg-brand/10 transition-colors">
+                  <Crown size={17} /> Upgrade to Pro
+                </NavLink>
+              )}
               <button onClick={doLogout}
                 className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-semibold border border-line bg-card/70 text-rust hover:bg-rust/10 transition-colors mt-1">
                 <LogOut size={16} /> Log out

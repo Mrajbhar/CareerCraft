@@ -1,4 +1,3 @@
-
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { randomUUID, randomBytes, createHash } from "crypto";
@@ -6,12 +5,12 @@ import User from "../models/User.js";
 
 const sign = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const publicUser = (u) => ({ id: u._id, name: u.name, email: u.email, avatar: u.avatar });
+import { publicUser } from "../lib/plan.js";
 const isDev = process.env.NODE_ENV !== "production";
 const hashToken = (t) => createHash("sha256").update(t).digest("hex");
 const validPassword = (p) => typeof p === "string" && p.length >= 8 && /[A-Za-z]/.test(p) && /[0-9]/.test(p);
 
-
+// POST /api/auth/signup
 export const signup = async (req, res) => {
   try {
     const name = (req.body.name || "").trim();
@@ -31,7 +30,7 @@ export const signup = async (req, res) => {
   }
 };
 
-
+// POST /api/auth/login
 export const login = async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
@@ -50,7 +49,7 @@ export const login = async (req, res) => {
   }
 };
 
-
+// POST /api/auth/google
 export const googleAuth = async (req, res) => {
   try {
     const { credential } = req.body;
@@ -83,14 +82,14 @@ export const googleAuth = async (req, res) => {
   }
 };
 
-
+// POST /api/auth/forgot  — issue a reset token (emailed in production; logged + returned in dev)
 export const forgotPassword = async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
     if (!EMAIL_RE.test(email)) return res.status(400).json({ msg: "Please enter a valid email address." });
 
     const user = await User.findOne({ email });
-    
+    // generic response either way, so we don't reveal which emails are registered
     const generic = { msg: "If an account exists for that email, a password reset link has been sent." };
 
     if (user) {
@@ -101,7 +100,8 @@ export const forgotPassword = async (req, res) => {
 
       const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset?token=${token}`;
       console.log("\n🔑 Password reset link (would be emailed):\n   " + resetUrl + "\n");
-      
+      // TODO: send `resetUrl` by email here (e.g. nodemailer) in production.
+
       if (isDev) return res.json({ ...generic, devNote: "Dev mode: link logged to server console.", resetToken: token, resetUrl });
     }
     res.json(generic);
@@ -110,7 +110,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-
+// POST /api/auth/reset  — set a new password using the token
 export const resetPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -129,4 +129,11 @@ export const resetPassword = async (req, res) => {
   } catch (e) {
     res.status(500).json({ msg: "Password reset failed", error: e.message });
   }
+};
+
+// GET /api/auth/me — current user (used to refresh plan/credits after changes)
+export const me = async (req, res) => {
+  const user = await User.findById(req.userId);
+  if (!user) return res.status(404).json({ msg: "User not found." });
+  res.json({ user: publicUser(user) });
 };

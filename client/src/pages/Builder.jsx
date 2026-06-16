@@ -3,9 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   User, Sparkles, Briefcase, GraduationCap, Code2, Star, Download, FileText,
   Check, Loader2, Award, Trophy, Link as LinkIcon, LayoutList, Plus, ClipboardCheck,
-  X, ChevronDown, Eye, PencilLine, ArrowLeft, Mail, Copy,
+  X, ChevronDown, Eye, PencilLine, ArrowLeft, Mail, Copy, Target, Crown, Lock,
 } from "lucide-react";
 import api from "../api";
+import { useAuth } from "../context/AuthContext";
 import { Field, AiBtn, AddBtn, Card, DownloadBtn, BulletEditor, PhoneField, DateRange, Select } from "../components/ui";
 import { ResumeStyles, ResumePreview, FONT_CHOICES } from "../components/ResumeTemplates";
 import { exportPDF, exportWord } from "../lib/exportResume";
@@ -130,6 +131,7 @@ function ScoreCard({ data }) {
 export default function Builder() {
   const { id } = useParams();
   const nav = useNavigate();
+  const { isPro } = useAuth();
   const [docTitle, setDocTitle] = useState("Untitled Resume");
   const [template, setTemplate] = useState("classic");
   const [data, setData] = useState(emptyData);
@@ -139,6 +141,11 @@ export default function Builder() {
   const [review, setReview] = useState(null);
   const [reviewing, setReviewing] = useState(false);
   const [coverOpen, setCoverOpen] = useState(false);
+  const [tailorOpen, setTailorOpen] = useState(false);
+  const [tailorLoading, setTailorLoading] = useState(false);
+  const [tailorJD, setTailorJD] = useState("");
+  const [tailorResult, setTailorResult] = useState(null);
+  const [appliedSummary, setAppliedSummary] = useState(false);
   const [coverLoading, setCoverLoading] = useState(false);
   const [coverText, setCoverText] = useState("");
   const [coverJob, setCoverJob] = useState("");
@@ -184,23 +191,52 @@ export default function Builder() {
   const updCustomItem = (sid, iid, f, val) => setData((d) => ({ ...d, custom: d.custom.map((s) => s.id === sid ? { ...s, items: s.items.map((it) => it.id === iid ? { ...it, [f]: val } : it) } : s) }));
   const delCustomItem = (sid, iid) => setData((d) => ({ ...d, custom: d.custom.map((s) => s.id === sid ? { ...s, items: s.items.filter((it) => it.id !== iid) } : s) }));
 
+  const handleAiErr = (err, fb) => {
+    if (err?.response?.status === 402 || err?.response?.status === 403) {
+      if (window.confirm((err.response.data?.error || "You\u2019re out of free AI credits.") + "\n\nSee Pro plans?")) nav("/pricing");
+      return;
+    }
+    alert(err?.response?.data?.error || err?.response?.data?.msg || fb);
+  };
+
   const aiSummary = async () => {
     flag("summary", true);
     try { const res = await api.post("/ai/summary", { title: data.title, skills: data.skillGroups.map((g) => g.items).join(", "), experience: data.experience }); if (res.data.text) set("summary", res.data.text); }
-    catch (err) { alert(err.response?.data?.error || err.response?.data?.msg || "AI request failed."); }
+    catch (err) { handleAiErr(err, "AI request failed."); }
     flag("summary", false);
   };
   const aiBullets = async (exp) => {
     flag("exp" + exp.id, true);
     try { const res = await api.post("/ai/bullets", { role: exp.role, company: exp.company, notes: exp.bullets }); if (res.data.text) upd("experience", exp.id, "bullets", res.data.text); }
-    catch (err) { alert(err.response?.data?.error || err.response?.data?.msg || "AI request failed."); }
+    catch (err) { handleAiErr(err, "AI request failed."); }
     flag("exp" + exp.id, false);
   };
   const aiReview = async () => {
     setReviewing(true); setReview("");
     try { const res = await api.post("/ai/review", { data }); setReview(res.data.text || "No feedback returned."); }
-    catch (err) { setReview(null); alert(err.response?.data?.error || err.response?.data?.msg || "AI review failed."); }
+    catch (err) { setReview(null); handleAiErr(err, "AI review failed."); }
     setReviewing(false);
+  };
+
+  const openTailor = () => { if (!isPro) { if (window.confirm("Tailor to Job is a Pro feature.\n\nSee Pro plans?")) nav("/pricing"); return; } setTailorOpen(true); };
+  const genTailor = async () => {
+    if (!tailorJD.trim()) { alert("Paste the job description first."); return; }
+    setTailorLoading(true); setAppliedSummary(false);
+    try {
+      const { data: r } = await api.post("/ai/tailor", {
+        title: data.title, summary: data.summary,
+        skills: (data.skillGroups || []).map((g) => g.items).join(", "),
+        experience: data.experience || [],
+        jobDescription: tailorJD,
+      });
+      setTailorResult(r);
+    } catch (err) { handleAiErr(err, "Tailoring failed. Please try again."); }
+    setTailorLoading(false);
+  };
+  const applyTailoredSummary = () => {
+    if (!tailorResult?.summary) return;
+    setData((d) => ({ ...d, summary: tailorResult.summary }));
+    setAppliedSummary(true);
   };
 
   const genCover = async () => {
@@ -209,7 +245,7 @@ export default function Builder() {
       const res = await api.post("/ai/cover", { data, jobTitle: coverJob, company: coverCompany, jobDescription: coverJD });
       setCoverText(res.data.text || "No letter returned.");
     } catch (err) {
-      alert(err.response?.data?.error || err.response?.data?.msg || "Cover letter generation failed.");
+      handleAiErr(err, "Cover letter generation failed.");
     }
     setCoverLoading(false);
   };
@@ -250,6 +286,11 @@ export default function Builder() {
           <button onClick={() => setCoverOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-white text-ink text-sm font-semibold hover:bg-paper transition shrink-0">
             <Mail size={15} /> <span className="hidden sm:inline">Cover Letter</span>
+          </button>
+          <button onClick={openTailor}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-white text-ink text-sm font-semibold hover:bg-paper transition shrink-0">
+            <Target size={15} /> <span className="hidden sm:inline">Tailor to Job</span>
+            {!isPro && <Crown size={12} className="text-brand" />}
           </button>
         </div>
       </div>
@@ -445,8 +486,8 @@ export default function Builder() {
               </div>
             </div>
             <div className="flex gap-2">
-              <DownloadBtn onClick={exportPDF} icon={Download} label="PDF" primary />
-              <DownloadBtn onClick={() => exportWord(previewData.name)} icon={FileText} label="Word" />
+              <DownloadBtn onClick={() => exportPDF({ pro: isPro })} icon={Download} label="PDF" primary />
+              <DownloadBtn onClick={() => exportWord(previewData.name, { pro: isPro })} icon={FileText} label="Word" />
             </div>
           </div>
           <div className="w-full max-w-[1100px] mx-auto">
@@ -457,7 +498,7 @@ export default function Builder() {
 
       {(reviewing || review !== null) && (
         <div onClick={() => !reviewing && setReview(null)} className="fixed inset-0 z-50 grid place-items-center p-5" style={{ background: "rgba(0,0,0,.45)" }}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-xl max-h-[80vh] overflow-auto p-6 shadow-2xl">
+          <div onClick={(e) => e.stopPropagation()} className="bg-paper border border-line rounded-2xl w-full max-w-xl max-h-[80vh] overflow-auto p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-display text-xl font-semibold flex items-center gap-2"><ClipboardCheck size={20} className="text-brand" /> AI Resume Review</h3>
               <button onClick={() => setReview(null)} disabled={reviewing}><X size={20} className="text-ink2" /></button>
@@ -469,9 +510,65 @@ export default function Builder() {
         </div>
       )}
 
+      {tailorOpen && (
+        <div onClick={() => !tailorLoading && setTailorOpen(false)} className="fixed inset-0 z-50 grid place-items-center p-5" style={{ background: "rgba(0,0,0,.45)" }}>
+          <div onClick={(e) => e.stopPropagation()} className="bg-paper border border-line rounded-2xl w-full max-w-xl max-h-[88vh] overflow-auto p-6 shadow-2xl">
+            <div className="flex justify-between items-center mb-1">
+              <h3 className="font-display text-xl font-semibold flex items-center gap-2">
+                <Target size={20} className="text-brand" /> Tailor to Job
+                <span className="text-[10px] font-bold bg-brand text-white px-1.5 py-0.5 rounded-full">PRO</span>
+              </h3>
+              <button onClick={() => setTailorOpen(false)} disabled={tailorLoading}><X size={20} className="text-ink2" /></button>
+            </div>
+            <p className="text-sm text-ink2 mb-4">Paste a job description — AI rewrites your summary, suggests matching bullet points, and lists keywords to include.</p>
+            <Field area label="Job description" value={tailorJD} onChange={setTailorJD} placeholder="Paste the full job post here…" />
+            <button onClick={genTailor} disabled={tailorLoading}
+              className="mt-1 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand text-white text-sm font-semibold disabled:opacity-60 hover:bg-brand-dark transition">
+              {tailorLoading ? <><Loader2 size={15} className="animate-spin" /> Tailoring…</> : <><Sparkles size={15} /> {tailorResult ? "Regenerate" : "Tailor my resume"}</>}
+            </button>
+
+            {tailorResult && !tailorLoading && (
+              <div className="mt-5 flex flex-col gap-5">
+                {tailorResult.summary && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <h4 className="font-semibold text-sm">Tailored summary</h4>
+                      <button onClick={applyTailoredSummary} className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline">
+                        {appliedSummary ? <><Check size={13} /> Applied</> : "Apply to resume"}
+                      </button>
+                    </div>
+                    <div className="rounded-xl border border-line bg-paper/40 p-3.5 text-sm leading-relaxed text-ink">{tailorResult.summary}</div>
+                  </div>
+                )}
+                {Array.isArray(tailorResult.bullets) && tailorResult.bullets.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1.5">Suggested bullet points</h4>
+                    <ul className="flex flex-col gap-1.5">
+                      {tailorResult.bullets.map((b, i) => (
+                        <li key={i} className="flex gap-2 text-sm text-ink"><span className="text-brand shrink-0">•</span><span>{b}</span></li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {Array.isArray(tailorResult.keywords) && tailorResult.keywords.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-sm mb-1.5">Keywords to include</h4>
+                    <div className="flex flex-wrap gap-1.5">
+                      {tailorResult.keywords.map((k, i) => (
+                        <span key={i} className="text-xs font-semibold px-2 py-1 rounded-full bg-brand/10 text-brand">{k}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {coverOpen && (
         <div onClick={() => !coverLoading && setCoverOpen(false)} className="fixed inset-0 z-50 grid place-items-center p-5" style={{ background: "rgba(0,0,0,.45)" }}>
-          <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl w-full max-w-xl max-h-[85vh] overflow-auto p-6 shadow-2xl">
+          <div onClick={(e) => e.stopPropagation()} className="bg-paper border border-line rounded-2xl w-full max-w-xl max-h-[85vh] overflow-auto p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-display text-xl font-semibold flex items-center gap-2"><Mail size={20} className="text-brand" /> AI Cover Letter</h3>
               <button onClick={() => setCoverOpen(false)} disabled={coverLoading}><X size={20} className="text-ink2" /></button>
