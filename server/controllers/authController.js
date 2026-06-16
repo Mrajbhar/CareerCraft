@@ -10,7 +10,6 @@ const isDev = process.env.NODE_ENV !== "production";
 const hashToken = (t) => createHash("sha256").update(t).digest("hex");
 const validPassword = (p) => typeof p === "string" && p.length >= 8 && /[A-Za-z]/.test(p) && /[0-9]/.test(p);
 
-// POST /api/auth/signup
 export const signup = async (req, res) => {
   try {
     const name = (req.body.name || "").trim();
@@ -30,7 +29,6 @@ export const signup = async (req, res) => {
   }
 };
 
-// POST /api/auth/login
 export const login = async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
@@ -49,7 +47,6 @@ export const login = async (req, res) => {
   }
 };
 
-// POST /api/auth/google
 export const googleAuth = async (req, res) => {
   try {
     const { credential } = req.body;
@@ -67,29 +64,36 @@ export const googleAuth = async (req, res) => {
     const email = (p.email || "").toLowerCase();
     if (!email) return res.status(400).json({ msg: "Google did not return an email." });
 
+    const fallbackName =
+      (p.name && p.name.trim()) ||
+      (p.given_name && p.given_name.trim()) ||
+      (email.includes("@") ? email.split("@")[0] : "") ||
+      "User";
+
     let user = await User.findOne({ email });
     if (!user) {
       const randomHash = await bcrypt.hash(randomUUID(), 10);
-      user = await User.create({ name: p.name || email.split("@")[0], email, password: randomHash, googleId: p.sub, avatar: p.picture });
-    } else if (!user.googleId) {
-      user.googleId = p.sub;
-      if (p.picture && !user.avatar) user.avatar = p.picture;
-      await user.save();
+      user = await User.create({ name: fallbackName, email, password: randomHash, googleId: p.sub, avatar: p.picture });
+    } else {
+      let changed = false;
+      if (!user.name) { user.name = fallbackName; changed = true; }
+      if (!user.googleId) { user.googleId = p.sub; changed = true; }
+      if (p.picture && !user.avatar) { user.avatar = p.picture; changed = true; }
+      if (changed) await user.save();
     }
     res.json({ token: sign(user._id), user: publicUser(user) });
   } catch (e) {
+    console.error("Google auth error:", e);
     res.status(500).json({ msg: "Google login failed", error: e.message });
   }
 };
 
-// POST /api/auth/forgot  — issue a reset token (emailed in production; logged + returned in dev)
 export const forgotPassword = async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
     if (!EMAIL_RE.test(email)) return res.status(400).json({ msg: "Please enter a valid email address." });
 
     const user = await User.findOne({ email });
-    // generic response either way, so we don't reveal which emails are registered
     const generic = { msg: "If an account exists for that email, a password reset link has been sent." };
 
     if (user) {
@@ -100,7 +104,6 @@ export const forgotPassword = async (req, res) => {
 
       const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset?token=${token}`;
       console.log("\n🔑 Password reset link (would be emailed):\n   " + resetUrl + "\n");
-      // TODO: send `resetUrl` by email here (e.g. nodemailer) in production.
 
       if (isDev) return res.json({ ...generic, devNote: "Dev mode: link logged to server console.", resetToken: token, resetUrl });
     }
@@ -110,7 +113,6 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// POST /api/auth/reset  — set a new password using the token
 export const resetPassword = async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -131,7 +133,6 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-// GET /api/auth/me — current user (used to refresh plan/credits after changes)
 export const me = async (req, res) => {
   const user = await User.findById(req.userId);
   if (!user) return res.status(404).json({ msg: "User not found." });

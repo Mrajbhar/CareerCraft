@@ -1,6 +1,4 @@
-// ===> place at: server/controllers/aiController.js
-// Uses Google AI Studio (Gemini API) via built-in fetch — no SDK install needed (Node 18+).
-const MODEL = "gemini-2.5-flash"; // stable + free-tier; swap to "gemini-2.5-pro" for higher quality
+const MODEL = "gemini-2.5-flash"; 
 const apiKey = () => process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 const hasKey = () => !!apiKey();
 
