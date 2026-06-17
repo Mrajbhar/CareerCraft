@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Loader2, Check, Type } from "lucide-react";
+import { ArrowRight, Loader2, Check, Type, Crown } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
+import UpgradeModal from "../components/UpgradeModal";
 import { ResumeStyles, ResumeRender } from "../components/ResumeTemplates";
 
 // realistic sample so each format looks like a finished resume
@@ -127,8 +128,21 @@ const TEMPLATES = [
     font: "Computer Modern",
     desc: "LaTeX Computer Modern serif, small-caps headings, icon contact row — academic/corporate feel.",
   },
+  {
+    key: "aurora",
+    label: "Aurora",
+    font: "Fraunces",
+    desc: "Bold full-width accent header banner over a clean single column.",
+  },
+  {
+    key: "onyx",
+    label: "Onyx",
+    font: "Lato",
+    desc: "Sleek dark header band with an accent underline — modern and corporate.",
+  },
 ];
 
+const PRO_TEMPLATES = ["aurora", "onyx"];
 const PAGE_W = 780;
 const FRAME_H = 360; // visible height of each thumbnail
 
@@ -180,13 +194,18 @@ function Thumb({ template }) {
 
 export default function Templates() {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, isPro } = useAuth();
   const [busy, setBusy] = useState(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [err, setErr] = useState("");
 
   const useTemplate = async (key) => {
     if (!user) {
       nav("/login");
+      return;
+    }
+    if (PRO_TEMPLATES.includes(key) && !isPro) {
+      setUpgradeOpen(true);
       return;
     }
     setErr("");
@@ -209,6 +228,15 @@ export default function Templates() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
       <ResumeStyles />
+      <UpgradeModal
+        open={upgradeOpen}
+        feature="This template"
+        onClose={() => setUpgradeOpen(false)}
+        onUpgrade={() => {
+          setUpgradeOpen(false);
+          nav("/pricing");
+        }}
+      />
       <style>{`@keyframes tIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}`}</style>
 
       {/* header */}
@@ -233,65 +261,86 @@ export default function Templates() {
 
       {/* gallery */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-        {TEMPLATES.map((t, i) => (
-          <div
-            key={t.key}
-            className="group rounded-2xl border border-line bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl"
-            style={{
-              animation: `tIn .5s cubic-bezier(.22,1,.36,1) both`,
-              animationDelay: `${(i % 3) * 80}ms`,
-            }}
-          >
-            {/* clickable preview */}
-            <button
-              onClick={() => useTemplate(t.key)}
-              className="block w-full text-left relative"
+        {TEMPLATES.map((t, i) => {
+          const isProTpl = PRO_TEMPLATES.includes(t.key);
+          const locked = isProTpl && !isPro;
+          return (
+            <div
+              key={t.key}
+              className="group rounded-2xl border border-line bg-card overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl"
+              style={{
+                animation: `tIn .5s cubic-bezier(.22,1,.36,1) both`,
+                animationDelay: `${(i % 3) * 80}ms`,
+              }}
             >
-              <div className="m-3 rounded-xl overflow-hidden border border-line shadow-sm">
-                <Thumb template={t.key} />
-              </div>
-              {/* hover overlay */}
-              <div
-                className="absolute inset-3 rounded-xl grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: "rgba(11,14,20,.55)" }}
-              >
-                <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg">
-                  Use this template <ArrowRight size={16} />
-                </span>
-              </div>
-            </button>
-
-            {/* meta + button */}
-            <div className="px-4 pb-4">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-display text-lg font-semibold">
-                  {t.label}
-                </h3>
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink2 bg-paper border border-line rounded-full px-2 py-0.5">
-                  <Type size={11} /> {t.font}
-                </span>
-              </div>
-              <p className="text-sm text-ink2 mt-1 mb-3 leading-snug">
-                {t.desc}
-              </p>
+              {/* clickable preview */}
               <button
                 onClick={() => useTemplate(t.key)}
-                disabled={busy === t.key}
-                className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition disabled:opacity-60"
+                className="block w-full text-left relative"
               >
-                {busy === t.key ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" /> Creating…
-                  </>
-                ) : (
-                  <>
-                    Use this template <ArrowRight size={15} />
-                  </>
+                <div className="m-3 rounded-xl overflow-hidden border border-line shadow-sm">
+                  <Thumb template={t.key} />
+                </div>
+                {isProTpl && (
+                  <span className="absolute top-5 right-5 inline-flex items-center gap-1 text-[10px] font-bold bg-brand text-white px-2 py-0.5 rounded-full shadow">
+                    <Crown size={10} /> PRO
+                  </span>
                 )}
+                {/* hover overlay */}
+                <div
+                  className="absolute inset-3 rounded-xl grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "rgba(11,14,20,.55)" }}
+                >
+                  <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold shadow-lg">
+                    {locked ? (
+                      <>
+                        <Crown size={16} /> Pro template
+                      </>
+                    ) : (
+                      <>
+                        Use this template <ArrowRight size={16} />
+                      </>
+                    )}
+                  </span>
+                </div>
               </button>
+
+              {/* meta + button */}
+              <div className="px-4 pb-4">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="font-display text-lg font-semibold">
+                    {t.label}
+                  </h3>
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-ink2 bg-paper border border-line rounded-full px-2 py-0.5">
+                    <Type size={11} /> {t.font}
+                  </span>
+                </div>
+                <p className="text-sm text-ink2 mt-1 mb-3 leading-snug">
+                  {t.desc}
+                </p>
+                <button
+                  onClick={() => useTemplate(t.key)}
+                  disabled={busy === t.key}
+                  className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition disabled:opacity-60"
+                >
+                  {busy === t.key ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" /> Creating…
+                    </>
+                  ) : locked ? (
+                    <>
+                      <Crown size={15} /> Unlock with Pro
+                    </>
+                  ) : (
+                    <>
+                      Use this template <ArrowRight size={15} />
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <p className="text-center text-xs text-ink2 mt-8">

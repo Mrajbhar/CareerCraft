@@ -204,6 +204,7 @@ const fontVars = (r) => {
     "--rz-serif": f.serif,
     "--rz-sans": f.sans,
     "--rz-fs": (r && r.scale) || 1,
+    "--rz-accent": (r && r.accent) || "#15634f",
   };
 };
 
@@ -307,7 +308,7 @@ const ProjectItem = ({ p }) => (
         <span
           style={{
             fontSize: "calc(12px * var(--rz-fs, 1))",
-            color: C.brand,
+            color: "var(--rz-accent, #15634f)",
             marginLeft: 8,
           }}
         >
@@ -430,7 +431,7 @@ const Title = ({ children }) => (
       fontSize: "calc(12.5px * var(--rz-fs, 1))",
       letterSpacing: ".12em",
       textTransform: "uppercase",
-      color: C.brand,
+      color: "var(--rz-accent, #15634f)",
       margin: "0 0 8px",
       fontWeight: 700,
     }}
@@ -478,13 +479,17 @@ export function ClassicResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...serif,
-        ...fontVars({ font: r.font || "classic", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "classic",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div
         style={{
           textAlign: "center",
-          borderBottom: `2px solid ${C.brand}`,
+          borderBottom: `2px solid ${"var(--rz-accent, #15634f)"}`,
           paddingBottom: 16,
           marginBottom: 18,
         }}
@@ -501,7 +506,7 @@ export function ClassicResume({ r }) {
         <div
           style={{
             fontSize: "calc(15px * var(--rz-fs, 1))",
-            color: C.brand,
+            color: "var(--rz-accent, #15634f)",
             fontWeight: 600,
             marginTop: 3,
           }}
@@ -524,7 +529,7 @@ export function ClassicResume({ r }) {
           {r.phone && <span>{r.phone}</span>}
           {loc(r) && <span>{loc(r)}</span>}
           {links.map((l) => (
-            <span key={l.id} style={{ color: C.brand }}>
+            <span key={l.id} style={{ color: "var(--rz-accent, #15634f)" }}>
               {l.label || l.url}
             </span>
           ))}
@@ -644,7 +649,7 @@ const MainTitle = ({ children }) => (
     style={{
       ...serif,
       fontSize: "calc(16px * var(--rz-fs, 1))",
-      color: C.brand,
+      color: "var(--rz-accent, #15634f)",
       margin: "0 0 9px",
       fontWeight: 600,
       borderBottom: `1px solid ${C.line}`,
@@ -689,13 +694,17 @@ export function ModernResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "poppins", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "poppins",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <aside
         style={{
           width: "34%",
-          background: C.brand,
+          background: "var(--rz-accent, #15634f)",
           color: "#eef3f0",
           padding: "34px 22px",
         }}
@@ -920,7 +929,11 @@ export function ProfessionalResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "lora", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "lora",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div>
@@ -938,7 +951,7 @@ export function ProfessionalResume({ r }) {
         <div
           style={{
             fontSize: "calc(15px * var(--rz-fs, 1))",
-            color: C.brand,
+            color: "var(--rz-accent, #15634f)",
             fontWeight: 600,
             marginTop: 2,
           }}
@@ -962,7 +975,10 @@ export function ProfessionalResume({ r }) {
         {r.phone && <span>{r.phone}</span>}
         {loc(r) && <span>{loc(r)}</span>}
         {links.map((l) => (
-          <span key={l.id} style={{ color: C.brand, fontWeight: 600 }}>
+          <span
+            key={l.id}
+            style={{ color: "var(--rz-accent, #15634f)", fontWeight: 600 }}
+          >
             {l.label || l.url}
           </span>
         ))}
@@ -1122,7 +1138,7 @@ const StdProj = ({ p }) => (
           style={{
             ...body,
             fontSize: "calc(12px * var(--rz-fs, 1))",
-            color: C.brand,
+            color: "var(--rz-accent, #15634f)",
             marginLeft: 8,
           }}
         >
@@ -1232,7 +1248,11 @@ export function StandardResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "georgia", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "georgia",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 4 }}>
@@ -1400,7 +1420,11 @@ export function MinimalResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "inter", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "inter",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <h1
@@ -1438,7 +1462,7 @@ export function MinimalResume({ r }) {
         {r.phone && <span>{r.phone}</span>}
         {loc(r) && <span>{loc(r)}</span>}
         {links.map((l) => (
-          <span key={l.id} style={{ color: C.brand }}>
+          <span key={l.id} style={{ color: "var(--rz-accent, #15634f)" }}>
             {l.label || l.url}
           </span>
         ))}
@@ -1580,7 +1604,11 @@ export function ElegantResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "playfair", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "playfair",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 22 }}>
@@ -1597,7 +1625,7 @@ export function ElegantResume({ r }) {
         <div
           style={{
             fontSize: "calc(14px * var(--rz-fs, 1))",
-            color: C.brand,
+            color: "var(--rz-accent, #15634f)",
             fontWeight: 600,
             marginTop: 4,
             letterSpacing: ".06em",
@@ -1723,7 +1751,7 @@ const CompTitle = ({ children }) => (
       fontWeight: 700,
       margin: "0 0 6px",
       paddingLeft: 8,
-      borderLeft: `3px solid ${C.brand}`,
+      borderLeft: `3px solid ${"var(--rz-accent, #15634f)"}`,
     }}
   >
     {children}
@@ -1750,7 +1778,11 @@ export function CompactResume({ r }) {
         minHeight: 600,
         fontSize: "calc(12.5px * var(--rz-fs, 1))",
         ...body,
-        ...fontVars({ font: r.font || "lato", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "lato",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div
@@ -1758,7 +1790,7 @@ export function CompactResume({ r }) {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-end",
-          borderBottom: `2px solid ${C.brand}`,
+          borderBottom: `2px solid ${"var(--rz-accent, #15634f)"}`,
           paddingBottom: 8,
           marginBottom: 12,
         }}
@@ -1777,7 +1809,7 @@ export function CompactResume({ r }) {
           <div
             style={{
               fontSize: "calc(13px * var(--rz-fs, 1))",
-              color: C.brand,
+              color: "var(--rz-accent, #15634f)",
               fontWeight: 600,
             }}
           >
@@ -1796,7 +1828,7 @@ export function CompactResume({ r }) {
           {r.phone && <div>{r.phone}</div>}
           {loc(r) && <div>{loc(r)}</div>}
           {links.map((l) => (
-            <div key={l.id} style={{ color: C.brand }}>
+            <div key={l.id} style={{ color: "var(--rz-accent, #15634f)" }}>
               {l.label || l.url}
             </div>
           ))}
@@ -2069,14 +2101,14 @@ export function ExecutiveResume({ r }) {
     contact.push({
       t: r.phone,
       href: `tel:${r.phone.replace(/[^\d+]/g, "")}`,
-      color: C.brand,
+      color: "var(--rz-accent, #15634f)",
       ic: "phone",
     });
   if (r.email)
     contact.push({
       t: r.email,
       href: `mailto:${r.email}`,
-      color: C.brand,
+      color: "var(--rz-accent, #15634f)",
       ic: "mail",
     });
   if (loc(r)) contact.push({ t: loc(r), href: null, color: C.soft, ic: "pin" });
@@ -2086,7 +2118,7 @@ export function ExecutiveResume({ r }) {
     contact.push({
       t: l.label || l.url,
       href: href(l.url || l.label),
-      color: C.brand,
+      color: "var(--rz-accent, #15634f)",
       ic,
     });
   });
@@ -2101,7 +2133,11 @@ export function ExecutiveResume({ r }) {
         color: C.ink,
         minHeight: 600,
         ...body,
-        ...fontVars({ font: r.font || "cmserif", scale: r.fontScale }),
+        ...fontVars({
+          font: r.font || "cmserif",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
       }}
     >
       <div style={{ textAlign: "center", marginBottom: 18 }}>
@@ -2122,7 +2158,7 @@ export function ExecutiveResume({ r }) {
           <div
             style={{
               fontSize: "calc(14px * var(--rz-fs, 1))",
-              color: C.brand,
+              color: "var(--rz-accent, #15634f)",
               fontWeight: 600,
               marginTop: 3,
             }}
@@ -2265,7 +2301,335 @@ export function ExecutiveResume({ r }) {
   );
 }
 
+/* ---------- AURORA (premium — full-width accent header banner) ---------- */
+export function AuroraResume({ r }) {
+  const links = r.links || [];
+  return (
+    <div
+      id="resume-paper"
+      style={{
+        background: "#fff",
+        borderRadius: 14,
+        boxShadow: "0 12px 40px rgba(0,0,0,.10)",
+        overflow: "hidden",
+        color: C.ink,
+        minHeight: 600,
+        ...serif,
+        ...fontVars({
+          font: r.font || "classic",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
+      }}
+    >
+      <div
+        style={{
+          background: "var(--rz-accent, #15634f)",
+          color: "#fff",
+          padding: "34px 46px 26px",
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "calc(33px * var(--rz-fs, 1))",
+            fontWeight: 600,
+          }}
+        >
+          {r.name}
+        </h1>
+        {r.title && (
+          <div
+            style={{
+              ...body,
+              fontSize: "calc(15px * var(--rz-fs, 1))",
+              opacity: 0.92,
+              marginTop: 4,
+              fontWeight: 600,
+            }}
+          >
+            {r.title}
+          </div>
+        )}
+        <div
+          style={{
+            ...body,
+            fontSize: "calc(12.5px * var(--rz-fs, 1))",
+            opacity: 0.9,
+            marginTop: 10,
+            display: "flex",
+            gap: 14,
+            flexWrap: "wrap",
+          }}
+        >
+          {r.email && <span>{r.email}</span>}
+          {r.phone && <span>{r.phone}</span>}
+          {loc(r) && <span>{loc(r)}</span>}
+          {links.map((l) => (
+            <span key={l.id}>{l.label || l.url}</span>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding: "26px 46px 44px" }}>
+        {prefs(r).length > 0 && (
+          <div
+            style={{
+              ...body,
+              fontSize: "calc(12px * var(--rz-fs, 1))",
+              color: C.mute,
+              marginBottom: 14,
+            }}
+          >
+            Open to: {prefs(r).join(" · ")}
+          </div>
+        )}
+        {r.summary && (
+          <Block title="Summary">
+            <p
+              style={{
+                ...body,
+                margin: 0,
+                fontSize: "calc(13.5px * var(--rz-fs, 1))",
+                lineHeight: 1.6,
+                color: C.soft,
+              }}
+            >
+              {r.summary}
+            </p>
+          </Block>
+        )}
+        {has(r.experience) && (
+          <Block title="Experience">
+            {clean(r.experience).map((e) => (
+              <ExperienceItem key={e.id} e={e} />
+            ))}
+          </Block>
+        )}
+        {has(r.projects) && (
+          <Block title="Projects">
+            {clean(r.projects).map((p) => (
+              <ProjectItem key={p.id} p={p} />
+            ))}
+          </Block>
+        )}
+        {has(r.skillGroups) && (
+          <Block title="Skills">
+            <SkillGroups groups={clean(r.skillGroups)} />
+          </Block>
+        )}
+        {has(r.education) && (
+          <Block title="Education">
+            {clean(r.education).map((e) => (
+              <EduItem key={e.id} e={e} />
+            ))}
+          </Block>
+        )}
+        {has(r.certifications) && (
+          <Block title="Certifications">
+            {clean(r.certifications).map((c) => (
+              <CertItem key={c.id} c={c} />
+            ))}
+          </Block>
+        )}
+        {has(r.achievements) && (
+          <Block title="Achievements">
+            <ul
+              style={{
+                ...body,
+                margin: 0,
+                paddingLeft: 18,
+                listStyleType: "disc",
+                fontSize: "calc(13px * var(--rz-fs, 1))",
+                lineHeight: 1.55,
+                color: C.soft,
+              }}
+            >
+              {clean(r.achievements).map((a) => (
+                <li key={a.id}>{a.text}</li>
+              ))}
+            </ul>
+          </Block>
+        )}
+        {has(r.custom) &&
+          r.custom.map(
+            (sec) =>
+              has(sec.items) && (
+                <Block key={sec.id} title={sec.title || "Section"}>
+                  {clean(sec.items).map((it) => (
+                    <CustomItem key={it.id} it={it} />
+                  ))}
+                </Block>
+              ),
+          )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- ONYX (premium — dark header band with accent underline) ---------- */
+export function OnyxResume({ r }) {
+  const links = r.links || [];
+  return (
+    <div
+      id="resume-paper"
+      style={{
+        background: "#fff",
+        borderRadius: 14,
+        boxShadow: "0 12px 40px rgba(0,0,0,.10)",
+        overflow: "hidden",
+        color: C.ink,
+        minHeight: 600,
+        ...serif,
+        ...fontVars({
+          font: r.font || "lato",
+          scale: r.fontScale,
+          accent: r.accent,
+        }),
+      }}
+    >
+      <div
+        style={{
+          background: "#1b1a17",
+          color: "#fff",
+          padding: "32px 46px",
+          borderBottom: "4px solid var(--rz-accent, #15634f)",
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: "calc(30px * var(--rz-fs, 1))",
+            fontWeight: 700,
+            letterSpacing: ".01em",
+          }}
+        >
+          {r.name}
+        </h1>
+        {r.title && (
+          <div
+            style={{
+              ...body,
+              fontSize: "calc(14px * var(--rz-fs, 1))",
+              color: "var(--rz-accent, #15634f)",
+              marginTop: 4,
+              fontWeight: 600,
+            }}
+          >
+            {r.title}
+          </div>
+        )}
+      </div>
+      <div
+        style={{
+          ...body,
+          fontSize: "calc(12px * var(--rz-fs, 1))",
+          color: C.soft,
+          padding: "12px 46px",
+          borderBottom: `1px solid ${C.line}`,
+          display: "flex",
+          gap: 14,
+          flexWrap: "wrap",
+        }}
+      >
+        {r.email && <span>{r.email}</span>}
+        {r.phone && <span>{r.phone}</span>}
+        {loc(r) && <span>{loc(r)}</span>}
+        {links.map((l) => (
+          <span key={l.id} style={{ color: "var(--rz-accent, #15634f)" }}>
+            {l.label || l.url}
+          </span>
+        ))}
+        {prefs(r).length > 0 && (
+          <span style={{ color: C.mute }}>Open to: {prefs(r).join(" · ")}</span>
+        )}
+      </div>
+      <div style={{ padding: "24px 46px 44px" }}>
+        {r.summary && (
+          <Block title="Summary">
+            <p
+              style={{
+                ...body,
+                margin: 0,
+                fontSize: "calc(13.5px * var(--rz-fs, 1))",
+                lineHeight: 1.6,
+                color: C.soft,
+              }}
+            >
+              {r.summary}
+            </p>
+          </Block>
+        )}
+        {has(r.experience) && (
+          <Block title="Experience">
+            {clean(r.experience).map((e) => (
+              <ExperienceItem key={e.id} e={e} />
+            ))}
+          </Block>
+        )}
+        {has(r.projects) && (
+          <Block title="Projects">
+            {clean(r.projects).map((p) => (
+              <ProjectItem key={p.id} p={p} />
+            ))}
+          </Block>
+        )}
+        {has(r.skillGroups) && (
+          <Block title="Skills">
+            <SkillGroups groups={clean(r.skillGroups)} />
+          </Block>
+        )}
+        {has(r.education) && (
+          <Block title="Education">
+            {clean(r.education).map((e) => (
+              <EduItem key={e.id} e={e} />
+            ))}
+          </Block>
+        )}
+        {has(r.certifications) && (
+          <Block title="Certifications">
+            {clean(r.certifications).map((c) => (
+              <CertItem key={c.id} c={c} />
+            ))}
+          </Block>
+        )}
+        {has(r.achievements) && (
+          <Block title="Achievements">
+            <ul
+              style={{
+                ...body,
+                margin: 0,
+                paddingLeft: 18,
+                listStyleType: "disc",
+                fontSize: "calc(13px * var(--rz-fs, 1))",
+                lineHeight: 1.55,
+                color: C.soft,
+              }}
+            >
+              {clean(r.achievements).map((a) => (
+                <li key={a.id}>{a.text}</li>
+              ))}
+            </ul>
+          </Block>
+        )}
+        {has(r.custom) &&
+          r.custom.map(
+            (sec) =>
+              has(sec.items) && (
+                <Block key={sec.id} title={sec.title || "Section"}>
+                  {clean(sec.items).map((it) => (
+                    <CustomItem key={it.id} it={it} />
+                  ))}
+                </Block>
+              ),
+          )}
+      </div>
+    </div>
+  );
+}
+
 export function ResumeRender({ r, template }) {
+  if (template === "aurora") return <AuroraResume r={r} />;
+  if (template === "onyx") return <OnyxResume r={r} />;
   if (template === "modern") return <ModernResume r={r} />;
   if (template === "professional") return <ProfessionalResume r={r} />;
   if (template === "standard") return <StandardResume r={r} />;
