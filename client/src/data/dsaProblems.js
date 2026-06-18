@@ -2,6 +2,8 @@
 
 export const dsaProblems = {
   "Two Sum": {
+    func: "two_sum",
+    tests: [{ args: [[2, 7, 11, 15], 9], expected: [0, 1] }, { args: [[3, 2, 4], 6], expected: [1, 2] }, { args: [[3, 3], 6], expected: [0, 1] }],
     difficulty: "Easy",
     topic: "Arrays & Hashing",
     statement:
@@ -22,6 +24,8 @@ export const dsaProblems = {
   },
 
   "Contains Duplicate": {
+    func: "contains_duplicate",
+    tests: [{ args: [[1, 2, 3, 1]], expected: true }, { args: [[1, 2, 3, 4]], expected: false }, { args: [[1, 1, 1, 3, 3, 4, 3, 2, 4, 2]], expected: true }],
     difficulty: "Easy",
     topic: "Arrays & Hashing",
     statement:
@@ -37,6 +41,8 @@ export const dsaProblems = {
   },
 
   "Group Anagrams": {
+    func: "group_anagrams",
+    tests: [{ args: [["eat", "tea", "tan", "ate", "nat", "bat"]], expected: [["eat", "tea", "ate"], ["tan", "nat"], ["bat"]] }, { args: [[""]], expected: [[""]] }],
     difficulty: "Medium",
     topic: "Arrays & Hashing",
     statement:
@@ -56,6 +62,8 @@ export const dsaProblems = {
   },
 
   "Top K Frequent Elements": {
+    func: "top_k_frequent",
+    tests: [{ args: [[1, 1, 1, 2, 2, 3], 2], expected: [1, 2] }, { args: [[1], 1], expected: [1] }],
     difficulty: "Medium",
     topic: "Arrays & Hashing",
     statement:
@@ -92,6 +100,8 @@ export const dsaProblems = {
   },
 
   "Valid Palindrome": {
+    func: "is_palindrome",
+    tests: [{ args: ["A man, a plan, a canal: Panama"], expected: true }, { args: ["race a car"], expected: false }, { args: [" "], expected: true }],
     difficulty: "Easy",
     topic: "Two Pointers",
     statement:
@@ -111,6 +121,8 @@ export const dsaProblems = {
   },
 
   "3Sum": {
+    func: "three_sum",
+    tests: [{ args: [[-1, 0, 1, 2, -1, -4]], expected: [[-1, -1, 2], [-1, 0, 1]] }, { args: [[0, 1, 1]], expected: [] }, { args: [[0, 0, 0]], expected: [[0, 0, 0]] }],
     difficulty: "Medium",
     topic: "Two Pointers",
     statement:
@@ -131,6 +143,8 @@ export const dsaProblems = {
   },
 
   "Container With Most Water": {
+    func: "max_area",
+    tests: [{ args: [[1, 8, 6, 2, 5, 4, 8, 3, 7]], expected: 49 }, { args: [[1, 1]], expected: 1 }],
     difficulty: "Medium",
     topic: "Two Pointers",
     statement:
@@ -149,6 +163,8 @@ export const dsaProblems = {
   },
 
   "Best Time to Buy and Sell Stock": {
+    func: "max_profit",
+    tests: [{ args: [[7, 1, 5, 3, 6, 4]], expected: 5 }, { args: [[7, 6, 4, 3, 1]], expected: 0 }, { args: [[1, 2]], expected: 1 }],
     difficulty: "Easy",
     topic: "Sliding Window",
     statement:
@@ -167,6 +183,8 @@ export const dsaProblems = {
   },
 
   "Valid Parentheses": {
+    func: "is_valid",
+    tests: [{ args: ["()[]{}"], expected: true }, { args: ["(]"], expected: false }, { args: ["([)]"], expected: false }, { args: ["{[]}"], expected: true }],
     difficulty: "Easy",
     topic: "Stack",
     statement:
@@ -188,6 +206,8 @@ export const dsaProblems = {
   },
 
   "Binary Search": {
+    func: "search",
+    tests: [{ args: [[-1, 0, 3, 5, 9, 12], 9], expected: 4 }, { args: [[-1, 0, 3, 5, 9, 12], 2], expected: -1 }, { args: [[5], 5], expected: 0 }],
     difficulty: "Easy",
     topic: "Binary Search",
     statement:
@@ -278,6 +298,8 @@ export const dsaProblems = {
   },
 
   "Maximum Subarray": {
+    func: "max_subarray",
+    tests: [{ args: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], expected: 6 }, { args: [[1]], expected: 1 }, { args: [[5, 4, -1, 7, 8]], expected: 23 }],
     difficulty: "Medium",
     topic: "Greedy",
     statement:
@@ -297,6 +319,8 @@ export const dsaProblems = {
   },
 
   "Climbing Stairs": {
+    func: "climb_stairs",
+    tests: [{ args: [2], expected: 2 }, { args: [3], expected: 3 }, { args: [5], expected: 8 }],
     difficulty: "Easy",
     topic: "Dynamic Programming",
     statement:
@@ -316,6 +340,8 @@ export const dsaProblems = {
   },
 
   "House Robber": {
+    func: "rob",
+    tests: [{ args: [[1, 2, 3, 1]], expected: 4 }, { args: [[2, 7, 9, 3, 1]], expected: 12 }, { args: [[2, 1, 1, 2]], expected: 4 }],
     difficulty: "Medium",
     topic: "Dynamic Programming",
     statement:
@@ -334,6 +360,8 @@ export const dsaProblems = {
   },
 
   "Coin Change": {
+    func: "coin_change",
+    tests: [{ args: [[1, 2, 5], 11], expected: 3 }, { args: [[2], 3], expected: -1 }, { args: [[1], 0], expected: 0 }],
     difficulty: "Medium",
     topic: "Dynamic Programming",
     statement:
@@ -354,6 +382,8 @@ export const dsaProblems = {
   },
 
   "Number of Islands": {
+    func: "num_islands",
+    tests: [{ args: [[["1", "1", "0"], ["1", "0", "0"], ["0", "0", "1"]]], expected: 2 }, { args: [[["1", "1", "1"], ["1", "1", "1"]]], expected: 1 }],
     difficulty: "Medium",
     topic: "Graphs",
     statement:
@@ -372,6 +402,8 @@ export const dsaProblems = {
   },
 
   "Single Number": {
+    func: "single_number",
+    tests: [{ args: [[2, 2, 1]], expected: 1 }, { args: [[4, 1, 2, 1, 2]], expected: 4 }, { args: [[1]], expected: 1 }],
     difficulty: "Easy",
     topic: "Bit Manipulation",
     statement:
@@ -391,6 +423,8 @@ export const dsaProblems = {
   },
 
   "Number of 1 Bits": {
+    func: "hamming_weight",
+    tests: [{ args: [11], expected: 3 }, { args: [128], expected: 1 }, { args: [7], expected: 3 }],
     difficulty: "Easy",
     topic: "Bit Manipulation",
     statement:
@@ -409,6 +443,8 @@ export const dsaProblems = {
   },
 
   "Longest Consecutive Sequence": {
+    func: "longest_consecutive",
+    tests: [{ args: [[100, 4, 200, 1, 3, 2]], expected: 4 }, { args: [[0, 3, 7, 2, 5, 8, 4, 6, 0, 1]], expected: 9 }, { args: [[]], expected: 0 }],
     difficulty: "Medium",
     topic: "Arrays & Hashing",
     statement:

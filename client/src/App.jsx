@@ -1,10 +1,4 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Background from "./components/Background";
 import Navbar from "./components/Navbar";
@@ -20,6 +14,7 @@ import Checker from "./pages/Checker";
 import Todo from "./pages/Todo";
 import Pricing from "./pages/Pricing";
 import AiTools from "./pages/AiTools";
+import Settings from "./pages/Settings";
 
 const Private = ({ children }) => {
   const { user } = useAuth();
@@ -28,10 +23,9 @@ const Private = ({ children }) => {
 
 function Shell() {
   const { pathname } = useLocation();
+  // hide footer on full-screen views (the editor + the split-screen auth pages)
   const hideFooter =
-    pathname.startsWith("/builder") ||
-    pathname === "/login" ||
-    pathname === "/signup";
+    pathname.startsWith("/builder") || pathname === "/login" || pathname === "/signup";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -41,74 +35,20 @@ function Shell() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/pricing" element={<Pricing />} />
+          {/* login and signup share one component, different start mode */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Login />} />
           <Route path="/reset" element={<Login />} />
 
-          <Route
-            path="/dashboard"
-            element={
-              <Private>
-                <Dashboard />
-              </Private>
-            }
-          />
-          <Route
-            path="/templates"
-            element={
-              <Private>
-                <Templates />
-              </Private>
-            }
-          />
-          <Route
-            path="/builder/:id"
-            element={
-              <Private>
-                <Builder />
-              </Private>
-            }
-          />
-          <Route
-            path="/resume/:id"
-            element={
-              <Private>
-                <ResumeView />
-              </Private>
-            }
-          />
-          <Route
-            path="/prep"
-            element={
-              <Private>
-                <Prep />
-              </Private>
-            }
-          />
-          <Route
-            path="/checker"
-            element={
-              <Private>
-                <Checker />
-              </Private>
-            }
-          />
-          <Route
-            path="/todos"
-            element={
-              <Private>
-                <Todo />
-              </Private>
-            }
-          />
-          <Route
-            path="/ai-tools"
-            element={
-              <Private>
-                <AiTools />
-              </Private>
-            }
-          />
+          <Route path="/dashboard" element={<Private><Dashboard /></Private>} />
+          <Route path="/templates" element={<Private><Templates /></Private>} />
+          <Route path="/builder/:id" element={<Private><Builder /></Private>} />
+          <Route path="/resume/:id" element={<Private><ResumeView /></Private>} />
+          <Route path="/prep" element={<Private><Prep /></Private>} />
+          <Route path="/checker" element={<Private><Checker /></Private>} />
+          <Route path="/todos" element={<Private><Todo /></Private>} />
+          <Route path="/ai-tools" element={<Private><AiTools /></Private>} />
+          <Route path="/settings" element={<Private><Settings /></Private>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

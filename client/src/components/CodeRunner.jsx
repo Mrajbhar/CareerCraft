@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import EditorPkg from "react-simple-code-editor";
-const Editor = EditorPkg?.default || EditorPkg; 
+const Editor = EditorPkg?.default || EditorPkg; // interop: some bundlers wrap the default export
 import { highlight, languages } from "prismjs/components/prism-core";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-c";
@@ -12,7 +12,7 @@ import "prismjs/components/prism-go";
 import "prismjs/components/prism-java";
 import "prismjs/components/prism-csharp";
 import "prismjs/themes/prism-tomorrow.css";
-import { Play, Loader2, RotateCcw, ChevronDown, TerminalSquare, Check } from "lucide-react";
+import { Play, Loader2, RotateCcw, ChevronDown, TerminalSquare, Check, X, CheckCircle2 } from "lucide-react";
 
 const LANGS = [
   { key: "javascript", label: "JavaScript", engine: "js", prism: "javascript", sample: 'console.log("Hello, world!");\n\nfunction twoSum(nums, target) {\n  const seen = {};\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i];\n    if (need in seen) return [seen[need], i];\n    seen[nums[i]] = i;\n  }\n}\nconsole.log(twoSum([2, 7, 11, 15], 9));' },
@@ -155,7 +155,48 @@ async function runGodbolt(lang, code, stdin) {
   return { stdout, stderr: [compileErr, runErr].filter(Boolean).join("\n") };
 }
 
-export default function CodeRunner({ initialCode, initialLangKey } = {}) {
+function buildHarness(func, tests) {
+  const json = JSON.stringify(tests.map((t) => [t.args, t.expected]));
+  return [
+    "import json as _json",
+    "def _norm(x):",
+    "    if isinstance(x, bool): return x",
+    "    if isinstance(x, list):",
+    "        try: return sorted((_norm(i) for i in x), key=lambda v: _json.dumps(v, sort_keys=True))",
+    "        except Exception: return [_norm(i) for i in x]",
+    "    return x",
+    "_cases = _json.loads(r + json + )",
+    "_passed = 0",
+    "for _i, _c in enumerate(_cases):",
+    "    _args, _exp = _c[0], _c[1]",
+    "    try:",
+    "        _got = " + func + "(*_args)",
+    "        _ok = _norm(_got) == _norm(_exp)",
+    "    except Exception as _e:",
+    "        _ok = False; _got = 'ERROR: ' + str(_e)",
+    "    print('__T%d:%s|got=%s|exp=%s' % (_i, 'PASS' if _ok else 'FAIL', repr(_got), repr(_exp)))",
+    "    if _ok: _passed += 1",
+    "print('__SUMMARY:%d/%d' % (_passed, len(_cases)))",
+  ].join("\n");
+}
+
+function parseVerdict(stdout) {
+  const cases = [];
+  let passed = 0, total = 0;
+  for (const ln of (stdout || "").split("\n")) {
+    if (ln.startsWith("__T")) {
+      const m = ln.match(/^__T(\d+):(PASS|FAIL)\|got=([\s\S]*?)\|exp=([\s\S]*)$/);
+      if (m) cases.push({ i: +m[1], ok: m[2] === "PASS", got: m[3], exp: m[4] });
+    } else if (ln.startsWith("__SUMMARY:")) {
+      const m = ln.match(/^__SUMMARY:(\d+)\/(\d+)$/);
+      if (m) { passed = +m[1]; total = +m[2]; }
+    }
+  }
+  if (!total && cases.length) { total = cases.length; passed = cases.filter((c) => c.ok).length; }
+  return { passed, total, cases, accepted: total > 0 && passed === total };
+}
+
+export default function CodeRunner({ initialCode, initialLangKey, tests, funcName } = {}) {
   const startKey = initialLangKey && LANGS.some((l) => l.key === initialLangKey) ? initialLangKey : "javascript";
   const [langKey, setLangKey] = useState(startKey);
   const [code, setCode] = useState(initialCode ?? (LANGS.find((l) => l.key === startKey)?.sample || LANGS[0].sample));
@@ -166,10 +207,12 @@ export default function CodeRunner({ initialCode, initialLangKey } = {}) {
   const [err, setErr] = useState("");
   const [showStdin, setShowStdin] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [verdict, setVerdict] = useState(null);
+  const canJudge = Array.isArray(tests) && tests.length > 0 && !!funcName;
 
   const lang = LANGS.find((l) => l.key === langKey);
-  const pickLang = (k) => { setLangKey(k); setCode(LANGS.find((l) => l.key === k).sample); setOut(null); setErr(""); };
-  const reset = () => { setCode(lang.sample); setOut(null); setErr(""); setStdin(""); };
+  const pickLang = (k) => { setLangKey(k); setCode(LANGS.find((l) => l.key === k).sample); setOut(null); setErr(""); setVerdict(null); };
+  const reset = () => { setCode(lang.sample); setOut(null); setErr(""); setStdin(""); setVerdict(null); };
 
   const run = async () => {
     setRunning(true); setOut(null); setErr(""); setStatus("");
@@ -180,6 +223,22 @@ export default function CodeRunner({ initialCode, initialLangKey } = {}) {
       else if (lang.engine === "wandbox") { setStatus("Compiling & running…"); r = await runWandbox(langKey, code, stdin); setStatus(""); }
       else { setStatus("Compiling & running…"); r = await runGodbolt(lang.key, code, stdin); setStatus(""); }
       setOut({ stdout: r.stdout, stderr: r.stderr, code: r.stderr ? 1 : 0 });
+    } catch (e) {
+      setErr(String((e && e.message) || e));
+    }
+    setStatus(""); setRunning(false);
+  };
+
+  const runTests = async () => {
+    if (!canJudge || langKey !== "python") return;
+    setRunning(true); setOut(null); setErr(""); setVerdict(null);
+    try {
+      setStatus("Loading Python runtime (first run only)…");
+      const r = await runPython(code + "\n\n" + buildHarness(funcName, tests), "");
+      setStatus("");
+      const v = parseVerdict(r.stdout || "");
+      setVerdict(v);
+      if (!v.total && r.stderr) setErr(r.stderr);
     } catch (e) {
       setErr(String((e && e.message) || e));
     }
@@ -226,6 +285,12 @@ export default function CodeRunner({ initialCode, initialLangKey } = {}) {
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition disabled:opacity-60">
           {running ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />} {running ? "Running…" : "Run"}
         </button>
+        {canJudge && langKey === "python" && (
+          <button onClick={runTests} disabled={running} title="Run your solution against the test cases"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-ink text-white text-sm font-semibold hover:opacity-90 transition disabled:opacity-60">
+            <CheckCircle2 size={16} /> Submit
+          </button>
+        )}
       </div>
 
       {showStdin && (
@@ -233,6 +298,30 @@ export default function CodeRunner({ initialCode, initialLangKey } = {}) {
           <label className="text-xs font-semibold text-ink2">Standard input (stdin)</label>
           <textarea value={stdin} onChange={(e) => setStdin(e.target.value)} rows={2} placeholder="Optional input passed to your program…"
             className="mt-1 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm font-mono outline-none focus:border-brand resize-y" />
+        </div>
+      )}
+
+      {verdict && (
+        <div className="px-3 sm:px-4 py-3 border-b border-line" style={{ background: verdict.accepted ? "rgba(24,168,132,.08)" : "rgba(224,116,58,.08)" }}>
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
+            {verdict.accepted ? <CheckCircle2 size={18} className="text-brand" /> : <X size={18} style={{ color: "#e0743a" }} />}
+            <span className="font-bold" style={{ color: verdict.accepted ? "#18a884" : "#e0743a" }}>{verdict.accepted ? "Accepted" : verdict.total ? "Wrong Answer" : "No result"}</span>
+            {verdict.total > 0 && <span className="text-ink2 text-sm">· {verdict.passed}/{verdict.total} test cases passed</span>}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {verdict.cases.map((c) => (
+              <span key={c.i} title={c.ok ? "Passed" : `got ${c.got} · expected ${c.exp}`}
+                className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                style={{ color: c.ok ? "#18a884" : "#e0743a", background: (c.ok ? "#18a884" : "#e0743a") + "1a" }}>
+                Case {c.i + 1} {c.ok ? "\u2713" : "\u2717"}
+              </span>
+            ))}
+          </div>
+          {!verdict.accepted && verdict.cases.find((c) => !c.ok) && (
+            <div className="mt-2 text-xs text-ink2" style={{ fontFamily: "ui-monospace, Menlo, monospace" }}>
+              First failing → got: {verdict.cases.find((c) => !c.ok).got} · expected: {verdict.cases.find((c) => !c.ok).exp}
+            </div>
+          )}
         </div>
       )}
 

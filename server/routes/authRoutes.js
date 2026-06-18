@@ -1,6 +1,6 @@
 import { Router } from "express";
 import auth from "../middleware/auth.js";
-import { signup, login, googleAuth, forgotPassword, resetPassword, me } from "../controllers/authController.js";
+import { signup, login, googleAuth, forgotPassword, resetPassword, me, changePassword, updateProfile } from "../controllers/authController.js";
 
 const router = Router();
 
@@ -10,5 +10,7 @@ router.post("/google", googleAuth);
 router.post("/forgot", forgotPassword);
 router.post("/reset", resetPassword);
 router.get("/me", auth, me);
+router.post("/password", auth, changePassword);
+router.patch("/profile", auth, updateProfile);
 
 export default router;
