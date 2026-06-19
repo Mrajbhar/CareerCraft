@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import billingRoutes from "./routes/billingRoutes.js";
+import progressRoutes from "./routes/progressRoutes.js";
 
 dotenv.config();
 
@@ -18,14 +19,17 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }));
 app.use(express.json());
 
-// ---- colorful request logger (morgan + chalk) ----
 app.use(
   morgan((tokens, req, res) => {
     const status = Number(tokens.status(req, res)) || 0;
     const color =
-      status >= 500 ? "red" :
-      status >= 400 ? "yellow" :
-      status >= 300 ? "cyan" : "green";
+      status >= 500
+        ? "red"
+        : status >= 400
+          ? "yellow"
+          : status >= 300
+            ? "cyan"
+            : "green";
     return [
       chalk.gray(new Date().toLocaleTimeString()),
       chalk.bold(tokens.method(req, res)),
@@ -33,26 +37,30 @@ app.use(
       chalk[color].bold(status),
       chalk.magenta(`${tokens["response-time"](req, res)} ms`),
     ].join(" ");
-  })
+  }),
 );
 
-// ---- routes -> controllers ----
 app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/billing", billingRoutes);
+app.use("/api/progress", progressRoutes);
 
 app.get("/", (_req, res) => res.send("CareerCraft API Running"));
 
-// ---- start ----
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log(chalk.green.bold("✅ MongoDB Connected"));
     app.listen(PORT, () =>
-      console.log(chalk.cyan.bold(`🚀 Server running on http://localhost:${PORT}`))
+      console.log(
+        chalk.cyan.bold(`🚀 Server running on http://localhost:${PORT}`),
+      ),
     );
   })
   .catch((err) =>
-    console.error(chalk.red.bold("❌ MongoDB Connection Error:"), chalk.red(err.message))
+    console.error(
+      chalk.red.bold("❌ MongoDB Connection Error:"),
+      chalk.red(err.message),
+    ),
   );
