@@ -9,7 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import billingRoutes from "./routes/billingRoutes.js";
-import progressRoutes from "./routes/progressRoutes.js";
+import progressRoutes from "./routes/Progressroutes.js";
 
 dotenv.config();
 
