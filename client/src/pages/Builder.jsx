@@ -27,6 +27,9 @@ import {
   Target,
   Crown,
   Lock,
+  History,
+  Save,
+  RotateCcw,
 } from "lucide-react";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -368,6 +371,10 @@ export default function Builder() {
   const proGate = (label) => setUpgradeFor(label);
   const [docTitle, setDocTitle] = useState("Untitled Resume");
   const [template, setTemplate] = useState("classic");
+  const [histOpen, setHistOpen] = useState(false);
+  const [versions, setVersions] = useState([]);
+  const [histBusy, setHistBusy] = useState(false);
+  const [restoring, setRestoring] = useState(null);
   const [data, setData] = useState(emptyData);
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(true);
@@ -418,6 +425,36 @@ export default function Builder() {
   }, [data, docTitle, template, id, loading]);
 
   const set = (k, v) => setData((d) => ({ ...d, [k]: v }));
+  const openHistory = async () => {
+    setHistOpen(true);
+    try {
+      const { data } = await api.get(`/resumes/${id}/versions`);
+      setVersions(data);
+    } catch {}
+  };
+  const saveVersion = async () => {
+    setHistBusy(true);
+    try {
+      const { data } = await api.post(`/resumes/${id}/versions`, {
+        label: "Manual save",
+      });
+      setVersions(data);
+    } catch {}
+    setHistBusy(false);
+  };
+  const restoreVer = async (vid) => {
+    setRestoring(vid);
+    try {
+      const { data: r } = await api.post(
+        `/resumes/${id}/versions/${vid}/restore`,
+      );
+      setDocTitle(r.title || "Untitled Resume");
+      setTemplate(r.template || "classic");
+      setData(migrate(r.data));
+      setHistOpen(false);
+    } catch {}
+    setRestoring(null);
+  };
   const setName = (k, v) =>
     setData((d) => {
       const n = { ...d, [k]: v };
@@ -654,7 +691,7 @@ export default function Builder() {
           <button
             onClick={() => nav("/dashboard")}
             title="Back to dashboard"
-            className="grid place-items-center w-9 h-9 rounded-lg border border-line bg-white text-ink2 hover:text-ink hover:-translate-y-0.5 transition shrink-0"
+            className="grid place-items-center w-9 h-9 rounded-lg border border-line bg-paper text-ink2 hover:text-ink hover:-translate-y-0.5 transition shrink-0"
           >
             <ArrowLeft size={17} />
           </button>
@@ -689,21 +726,107 @@ export default function Builder() {
           </button>
           <button
             onClick={() => setCoverOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-white text-ink text-sm font-semibold hover:bg-paper transition shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-paper text-ink text-sm font-semibold hover:bg-card transition shrink-0"
           >
             <Mail size={15} />{" "}
             <span className="hidden sm:inline">Cover Letter</span>
           </button>
           <button
             onClick={openTailor}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-white text-ink text-sm font-semibold hover:bg-paper transition shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-paper text-ink text-sm font-semibold hover:bg-card transition shrink-0"
           >
             <Target size={15} />{" "}
             <span className="hidden sm:inline">Tailor to Job</span>
             {!isPro && <Crown size={12} className="text-brand" />}
           </button>
+          <button
+            onClick={openHistory}
+            title="Version history"
+            aria-label="Version history"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-line bg-paper text-ink text-sm font-semibold hover:bg-card transition shrink-0"
+          >
+            <History size={15} />{" "}
+            <span className="hidden sm:inline">History</span>
+          </button>
         </div>
       </div>
+
+      {histOpen && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center p-4"
+          style={{ background: "rgba(0,0,0,.6)" }}
+          onClick={() => setHistOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-line bg-card p-5 max-h-[80vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="font-display text-lg font-semibold flex items-center gap-2">
+                <History size={18} /> Version history
+              </h3>
+              <button
+                onClick={() => setHistOpen(false)}
+                aria-label="Close"
+                className="text-ink2 hover:text-ink p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <p className="text-ink2 text-[13px] mb-3">
+              Snapshots of this resume. Restoring saves your current version
+              first, so you can always undo.
+            </p>
+            <button
+              onClick={saveVersion}
+              disabled={histBusy}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-brand text-white text-sm font-semibold hover:bg-brand-dark transition disabled:opacity-60 mb-3"
+            >
+              {histBusy ? (
+                <Loader2 size={15} className="animate-spin" />
+              ) : (
+                <Save size={15} />
+              )}{" "}
+              Save current as version
+            </button>
+            <div className="flex-1 overflow-y-auto -mx-1 px-1">
+              {versions.length === 0 ? (
+                <p className="text-ink2 text-sm text-center py-6">
+                  No versions yet.
+                </p>
+              ) : (
+                <ul className="flex flex-col divide-y divide-line">
+                  {versions.map((v) => (
+                    <li key={v._id} className="flex items-center gap-3 py-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium truncate">
+                          {v.label || "Saved version"}
+                        </div>
+                        <div className="text-xs text-ink2">
+                          {new Date(v.createdAt).toLocaleString()} ·{" "}
+                          {v.template}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => restoreVer(v._id)}
+                        disabled={restoring === v._id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-line text-ink text-xs font-semibold hover:bg-paper transition disabled:opacity-60 shrink-0"
+                      >
+                        {restoring === v._id ? (
+                          <Loader2 size={13} className="animate-spin" />
+                        ) : (
+                          <RotateCcw size={13} />
+                        )}{" "}
+                        Restore
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="lg:hidden px-4 sm:px-6 mt-3">
         <div className="flex rounded-xl border border-line overflow-hidden">
@@ -803,7 +926,7 @@ export default function Builder() {
                   <button
                     key={k}
                     onClick={() => pref(k)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${on ? "bg-brand text-white border-brand" : "bg-white text-ink2 border-line hover:border-brand"}`}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${on ? "bg-brand text-white border-brand" : "bg-paper text-ink2 border-line hover:border-brand"}`}
                   >
                     {l}
                   </button>
@@ -1155,7 +1278,7 @@ export default function Builder() {
               ))}
               <button
                 onClick={() => del("custom", sec.id)}
-                className="text-xs font-semibold text-rust border border-line bg-white rounded-lg px-3 py-1.5 mt-1 self-start"
+                className="text-xs font-semibold text-rust border border-line bg-paper rounded-lg px-3 py-1.5 mt-1 self-start"
               >
                 Remove section
               </button>
@@ -1198,7 +1321,7 @@ export default function Builder() {
                         locked ? proGate("This template") : setTemplate(t)
                       }
                       title={locked ? "Pro template" : ""}
-                      className={`relative inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-ink text-white border-ink" : "bg-white text-ink2 border-line hover:bg-paper"}`}
+                      className={`relative inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-brand text-white border-brand" : "bg-paper text-ink2 border-line hover:bg-card"}`}
                     >
                       {t}
                       {isProTpl && (
@@ -1217,7 +1340,7 @@ export default function Builder() {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-ink2">Font</span>
                   <Select
-                    theme="light"
+                    theme="dark"
                     width={210}
                     value={data.font || ""}
                     onChange={(v) => set("font", v)}
@@ -1237,7 +1360,7 @@ export default function Builder() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-semibold text-ink2">Size</span>
-                  <div className="flex items-center rounded-lg border border-line bg-white overflow-hidden">
+                  <div className="flex items-center rounded-lg border border-line bg-paper overflow-hidden">
                     <button
                       onClick={() =>
                         set(
@@ -1249,7 +1372,7 @@ export default function Builder() {
                           ),
                         )
                       }
-                      className="px-2.5 py-1 text-ink2 hover:bg-paper text-sm font-bold"
+                      className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
                       title="Smaller"
                     >
                       −
@@ -1271,7 +1394,7 @@ export default function Builder() {
                           ),
                         )
                       }
-                      className="px-2.5 py-1 text-ink2 hover:bg-paper text-sm font-bold"
+                      className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
                       title="Bigger"
                     >
                       +

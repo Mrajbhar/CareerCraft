@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Layers,
   Sparkles,
@@ -104,7 +104,7 @@ export default function Login() {
       setInfo(data.msg || "If an account exists, a reset link has been sent.");
       if (data.resetToken) {
         setResetToken(data.resetToken);
-      }
+      } // dev: lets you continue in-app
     } catch (e) {
       setErr(e.response?.data?.msg || "Could not send reset link.");
     }
@@ -129,6 +129,7 @@ export default function Login() {
     setBusy(false);
   };
 
+  // Google button (login/signup only)
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID || (mode !== "login" && mode !== "signup")) return;
     const render = () => {
@@ -168,6 +169,7 @@ export default function Login() {
     document.body.appendChild(s);
   }, [mode]);
 
+  // dark-theme input: visible text on dark surface + clear brand focus ring
   const input =
     "w-full pl-11 pr-4 py-3 rounded-xl border border-line bg-white/[0.04] text-ink text-[15px] placeholder-ink2 outline-none transition focus:border-brand focus:bg-white/[0.06] focus:ring-2 focus:ring-brand/25";
   const strength = pwStrength(form.password);
@@ -196,7 +198,7 @@ export default function Login() {
     },
   ];
   const stats = [
-    ["10", "Templates"],
+    ["7", "Templates"],
     ["170+", "DSA problems"],
     ["Free", "to start"],
   ];
@@ -244,6 +246,7 @@ export default function Login() {
         .lf{animation:lf .5s cubic-bezier(.22,1,.36,1) both}
       `}</style>
 
+      {/* brand pitch panel */}
       <div
         className="hidden lg:flex relative overflow-hidden border-r border-line p-12 flex-col justify-between text-white"
         style={{ background: "linear-gradient(160deg,#0e1a17,#0b0e14 62%)" }}
@@ -326,6 +329,7 @@ export default function Login() {
           </h1>
           <p className="text-ink2 mt-1.5 mb-6">{sub}</p>
 
+          {/* Google + email (login/signup only) */}
           {(isLogin || isSignup) && (
             <>
               {GOOGLE_CLIENT_ID ? (
@@ -485,8 +489,15 @@ export default function Login() {
 
           {isSignup && (
             <p className="text-[11px] text-ink2 text-center mt-3 leading-relaxed">
-              By creating an account you agree to our Terms of Service and
-              Privacy Policy.
+              By creating an account you agree to our{" "}
+              <Link to="/terms" className="text-brand hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-brand hover:underline">
+                Privacy Policy
+              </Link>
+              .
             </p>
           )}
 

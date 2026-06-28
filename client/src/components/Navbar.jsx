@@ -160,6 +160,8 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen((v) => !v)}
+                  aria-label="Account menu"
+                  aria-expanded={profileOpen}
                   className={`flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-full border transition-colors ${profileOpen ? "border-brand/40 bg-paper" : "border-line bg-card/60 hover:bg-paper"}`}
                 >
                   <Avatar user={user} />

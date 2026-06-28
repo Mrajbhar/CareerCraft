@@ -10,6 +10,8 @@ import {
   Search,
   LayoutTemplate,
   Files,
+  Upload,
+  Loader2,
   ArrowRight,
   Copy,
   LayoutGrid,
@@ -199,6 +201,31 @@ export default function Dashboard() {
     });
     nav(`/builder/${r.data._id}`);
   };
+
+  const importRef = useRef();
+  const [importing, setImporting] = useState(false);
+  const [importErr, setImportErr] = useState("");
+  const onImport = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setImportErr("");
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const { data } = await api.post("/resumes/import", fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      nav(`/builder/${data.id}`);
+    } catch (err) {
+      setImportErr(
+        err.response?.data?.msg ||
+          "Import failed. Please try a PDF or DOCX file.",
+      );
+    }
+    setImporting(false);
+  };
   const remove = async (id) => {
     if (!confirm("Delete this resume?")) return;
     await api.delete(`/resumes/${id}`);
@@ -381,6 +408,25 @@ export default function Dashboard() {
               <Pencil size={15} /> Continue editing
             </button>
           )}
+          <input
+            ref={importRef}
+            type="file"
+            accept=".pdf,.docx"
+            className="hidden"
+            onChange={onImport}
+          />
+          <button
+            onClick={() => importRef.current?.click()}
+            disabled={importing}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-line bg-card text-ink font-semibold text-sm hover:border-brand/40 transition disabled:opacity-60"
+          >
+            {importing ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <Upload size={15} />
+            )}{" "}
+            {importing ? "Importing…" : "Import resume"}
+          </button>
           <button
             onClick={create}
             className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white font-semibold text-sm hover:bg-brand-dark transition"
@@ -393,6 +439,11 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+      {importErr && (
+        <div className="text-rust text-sm mb-4 bg-rust/10 border border-rust/20 rounded-lg px-3 py-2">
+          {importErr}
+        </div>
+      )}
 
       {/* stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">

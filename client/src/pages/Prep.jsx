@@ -1,4 +1,12 @@
-import { useState, useMemo, useEffect, useRef, useLayoutEffect } from "react";
+import {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useLayoutEffect,
+  lazy,
+  Suspense,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -34,8 +42,16 @@ import {
   Lightbulb,
   Database,
 } from "lucide-react";
-import CodeRunner from "../components/CodeRunner";
-import SqlRunner from "../components/SqlRunner";
+const CodeRunner = lazy(() => import("../components/CodeRunner"));
+const SqlRunner = lazy(() => import("../components/SqlRunner"));
+const RunnerFallback = () => (
+  <div className="rounded-xl border border-line bg-card p-8 text-center text-ink2 text-sm">
+    Loading editor…
+  </div>
+);
+function Lazy({ children }) {
+  return <Suspense fallback={<RunnerFallback />}>{children}</Suspense>;
+}
 import { dsaTheory } from "../data/dsaTheory";
 import { dsaCourse, learningOrder } from "../data/dsaCourse";
 import { dsaProblems } from "../data/dsaProblems";
@@ -1550,13 +1566,15 @@ export default function Prep() {
                                   </div>
                                 ))}
                               </div>
-                              <CodeRunner
-                                key={"dsa" + asActive}
-                                initialLangKey="python"
-                                initialCode={pr.starter}
-                                tests={pr.tests}
-                                funcName={pr.func}
-                              />
+                              <Lazy>
+                                <CodeRunner
+                                  key={"dsa" + asActive}
+                                  initialLangKey="python"
+                                  initialCode={pr.starter}
+                                  tests={pr.tests}
+                                  funcName={pr.func}
+                                />
+                              </Lazy>
                             </>
                           );
                         })()
@@ -1776,7 +1794,9 @@ export default function Prep() {
                 compile online — no key needed.
               </p>
               <div className="mb-9">
-                <CodeRunner />
+                <Lazy>
+                  <CodeRunner />
+                </Lazy>
               </div>
 
               <h2 className="font-display text-xl font-semibold mb-1">
@@ -2402,11 +2422,13 @@ export default function Prep() {
                   {activeSql.schema}
                 </pre>
               </details>
-              <SqlRunner
-                schema={activeSql.schema}
-                expected={activeSql.expected}
-                ordered={!!activeSql.ordered}
-              />
+              <Lazy>
+                <SqlRunner
+                  schema={activeSql.schema}
+                  expected={activeSql.expected}
+                  ordered={!!activeSql.ordered}
+                />
+              </Lazy>
             </div>
           </div>
         </div>
@@ -2643,14 +2665,16 @@ export default function Prep() {
                       Open on LeetCode <ExternalLink size={13} />
                     </a>
                   </div>
-                  <CodeRunner
-                    key={activeProblem}
-                    initialLangKey="python"
-                    initialCode={pr.starter}
-                    tests={pr.tests}
-                    funcName={pr.func}
-                    onResult={(v) => recordSubmission(activeProblem, v)}
-                  />
+                  <Lazy>
+                    <CodeRunner
+                      key={activeProblem}
+                      initialLangKey="python"
+                      initialCode={pr.starter}
+                      tests={pr.tests}
+                      funcName={pr.func}
+                      onResult={(v) => recordSubmission(activeProblem, v)}
+                    />
+                  </Lazy>
                 </div>
               </div>
             </div>
