@@ -164,8 +164,19 @@ function Acc({
   open,
   setOpen,
   children,
+  filled,
 }) {
   const isOpen = open === id;
+  const hasStatus = filled !== undefined || count !== undefined;
+  const done = filled !== undefined ? filled : (count || 0) > 0;
+  const statusLabel =
+    filled !== undefined
+      ? done
+        ? "Complete"
+        : "Empty"
+      : count > 0
+        ? `${count} added`
+        : "Empty";
   return (
     <div className="rounded-xl border border-line bg-card overflow-hidden shrink-0">
       <div className="flex items-center justify-between gap-2 pr-3">
@@ -177,13 +188,21 @@ function Acc({
             <Icon size={17} />
           </span>
           <span className="font-semibold truncate">{title}</span>
-          {count > 0 && (
-            <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-brand/10 text-brand shrink-0">
-              {count}
+        </button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          {hasStatus && !isOpen && (
+            <span
+              className={`hidden sm:inline-flex items-center gap-1.5 text-[11px] font-medium ${done ? "text-brand" : "text-ink2"}`}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: done ? "#18a884" : "rgba(255,255,255,.22)",
+                }}
+              />
+              {statusLabel}
             </span>
           )}
-        </button>
-        <div className="flex items-center gap-2 shrink-0">
           {isOpen && action}
           <button onClick={() => setOpen(isOpen ? null : id)} className="p-1">
             <ChevronDown
@@ -672,6 +691,19 @@ export default function Builder() {
 
   if (loading) return <p style={{ padding: 30 }}>Loading…</p>;
 
+  const _cChecks = [
+    !!(data.firstName || data.name || "").trim(),
+    !!(data.summary || "").trim(),
+    (data.experience || []).length,
+    (data.skillGroups || []).length,
+    (data.education || []).length,
+    (data.projects || []).length +
+      (data.certifications || []).length +
+      (data.achievements || []).length,
+  ];
+  const completeness = Math.round(
+    (_cChecks.filter(Boolean).length / _cChecks.length) * 100,
+  );
   const previewData = {
     ...data,
     name: data.name || `${data.firstName || ""} ${data.lastName || ""}`.trim(),
@@ -748,6 +780,149 @@ export default function Builder() {
             <History size={15} />{" "}
             <span className="hidden sm:inline">History</span>
           </button>
+        </div>
+      </div>
+
+      {/* controls row (row 2) */}
+      <div className="px-4 sm:px-6 lg:px-8 mt-3">
+        <div className="flex items-center gap-3 flex-wrap justify-between rounded-2xl border border-line bg-card px-3 sm:px-4 py-2.5">
+          <div className="flex gap-1.5 flex-wrap">
+            {[
+              "classic",
+              "modern",
+              "professional",
+              "standard",
+              "minimal",
+              "elegant",
+              "compact",
+              "executive",
+              "aurora",
+              "onyx",
+            ].map((t) => {
+              const isProTpl = PRO_TEMPLATES.includes(t);
+              const locked = isProTpl && !isPro;
+              return (
+                <button
+                  key={t}
+                  onClick={() =>
+                    locked ? proGate("This template") : setTemplate(t)
+                  }
+                  title={locked ? "Pro template" : ""}
+                  className={`relative inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-brand text-white border-brand" : "bg-paper text-ink2 border-line hover:bg-card"}`}
+                >
+                  {t}
+                  {isProTpl && (
+                    <Crown
+                      size={11}
+                      className={
+                        template === t ? "text-amber-300" : "text-brand"
+                      }
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-ink2 hidden xl:inline">
+                Font
+              </span>
+              <Select
+                theme="dark"
+                width={170}
+                value={data.font || ""}
+                onChange={(v) => set("font", v)}
+                options={FONT_CHOICES.map((f) => ({
+                  value: f.id,
+                  label: f.label,
+                }))}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-ink2 hidden xl:inline">
+                Size
+              </span>
+              <div className="flex items-center rounded-lg border border-line bg-paper overflow-hidden">
+                <button
+                  onClick={() =>
+                    set(
+                      "fontScale",
+                      Math.max(
+                        0.8,
+                        Math.round(((data.fontScale || 1) - 0.05) * 100) / 100,
+                      ),
+                    )
+                  }
+                  className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
+                  title="Smaller"
+                >
+                  −
+                </button>
+                <span
+                  className="px-2 text-xs font-semibold text-ink text-center"
+                  style={{ minWidth: 42 }}
+                >
+                  {Math.round((data.fontScale || 1) * 100)}%
+                </span>
+                <button
+                  onClick={() =>
+                    set(
+                      "fontScale",
+                      Math.min(
+                        1.3,
+                        Math.round(((data.fontScale || 1) + 0.05) * 100) / 100,
+                      ),
+                    )
+                  }
+                  className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
+                  title="Bigger"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-ink2 items-center gap-1 hidden xl:inline-flex">
+                Accent{!isPro && <Crown size={11} className="text-brand" />}
+              </span>
+              <div className="flex items-center gap-1.5">
+                {ACCENTS.map((c) => (
+                  <button
+                    key={c}
+                    aria-label="accent color"
+                    title={isPro ? "" : "Pro feature"}
+                    onClick={() =>
+                      isPro ? set("accent", c) : proGate("Custom accent colors")
+                    }
+                    className="w-5 h-5 rounded-full border-2 transition"
+                    style={{
+                      background: c,
+                      borderColor:
+                        (data.accent || "#15634f") === c
+                          ? "#1b1a17"
+                          : "transparent",
+                      opacity: isPro ? 1 : 0.55,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="w-px h-6 bg-line hidden sm:block" />
+            <div className="flex gap-2">
+              <DownloadBtn
+                onClick={() => exportPDF({ pro: isPro })}
+                icon={Download}
+                label="PDF"
+                primary
+              />
+              <DownloadBtn
+                onClick={() => exportWord(previewData.name, { pro: isPro })}
+                icon={FileText}
+                label="Word"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -852,7 +1027,14 @@ export default function Builder() {
         >
           <ScoreCard data={data} />
 
-          <Acc {...acc("personal")} icon={User} title="Personal Information">
+          <Acc
+            {...acc("personal")}
+            icon={User}
+            title="Personal Information"
+            filled={
+              !!((data.firstName || "").trim() || (data.name || "").trim())
+            }
+          >
             <div className="grid grid-cols-2 gap-2.5">
               <Field
                 label="First Name"
@@ -971,6 +1153,7 @@ export default function Builder() {
             {...acc("summary")}
             icon={Sparkles}
             title="Professional Summary"
+            filled={!!(data.summary || "").trim()}
             action={
               <AiBtn
                 onClick={aiSummary}
@@ -1297,172 +1480,70 @@ export default function Builder() {
         <div
           className={`${tab === "preview" ? "block" : "hidden"} lg:block lg:flex-1 lg:h-[calc(100vh-140px)] lg:overflow-y-auto px-4 sm:px-6 lg:px-8 py-4`}
         >
-          <div className="flex justify-between items-center mb-3 flex-wrap gap-2 w-full max-w-[1100px] mx-auto">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-1.5 flex-wrap">
-                {[
-                  "classic",
-                  "modern",
-                  "professional",
-                  "standard",
-                  "minimal",
-                  "elegant",
-                  "compact",
-                  "executive",
-                  "aurora",
-                  "onyx",
-                ].map((t) => {
-                  const isProTpl = PRO_TEMPLATES.includes(t);
-                  const locked = isProTpl && !isPro;
-                  return (
-                    <button
-                      key={t}
-                      onClick={() =>
-                        locked ? proGate("This template") : setTemplate(t)
-                      }
-                      title={locked ? "Pro template" : ""}
-                      className={`relative inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs font-semibold capitalize transition ${template === t ? "bg-brand text-white border-brand" : "bg-paper text-ink2 border-line hover:bg-card"}`}
-                    >
-                      {t}
-                      {isProTpl && (
-                        <Crown
-                          size={11}
-                          className={
-                            template === t ? "text-amber-300" : "text-brand"
-                          }
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-ink2">Font</span>
-                  <Select
-                    theme="dark"
-                    width={210}
-                    value={data.font || ""}
-                    onChange={(v) => set("font", v)}
-                    options={FONT_CHOICES.map((f) => ({
-                      value: f.id,
-                      label: f.label,
-                    }))}
+          <div className="flex justify-between items-center mb-3 w-full max-w-[1100px] mx-auto">
+            <span className="text-xs font-semibold text-ink2 inline-flex items-center gap-1.5">
+              <Eye size={14} /> Live preview
+            </span>
+            <div
+              className="hidden sm:flex items-center gap-2"
+              title="Resume completeness"
+            >
+              <div style={{ position: "relative", width: 36, height: 36 }}>
+                <svg width="36" height="36" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="rgba(255,255,255,.1)"
+                    strokeWidth="4"
                   />
-                  {data.font ? (
-                    <button
-                      onClick={() => set("font", "")}
-                      className="text-xs text-ink2 underline hover:text-ink"
-                    >
-                      reset
-                    </button>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-ink2">Size</span>
-                  <div className="flex items-center rounded-lg border border-line bg-paper overflow-hidden">
-                    <button
-                      onClick={() =>
-                        set(
-                          "fontScale",
-                          Math.max(
-                            0.8,
-                            Math.round(((data.fontScale || 1) - 0.05) * 100) /
-                              100,
-                          ),
-                        )
-                      }
-                      className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
-                      title="Smaller"
-                    >
-                      −
-                    </button>
-                    <span
-                      className="px-2 text-xs font-semibold text-ink text-center"
-                      style={{ minWidth: 42 }}
-                    >
-                      {Math.round((data.fontScale || 1) * 100)}%
-                    </span>
-                    <button
-                      onClick={() =>
-                        set(
-                          "fontScale",
-                          Math.min(
-                            1.3,
-                            Math.round(((data.fontScale || 1) + 0.05) * 100) /
-                              100,
-                          ),
-                        )
-                      }
-                      className="px-2.5 py-1 text-ink2 hover:bg-card text-sm font-bold"
-                      title="Bigger"
-                    >
-                      +
-                    </button>
-                  </div>
-                  {data.fontScale && data.fontScale !== 1 ? (
-                    <button
-                      onClick={() => set("fontScale", 1)}
-                      className="text-xs text-ink2 underline hover:text-ink"
-                    >
-                      reset
-                    </button>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-ink2 inline-flex items-center gap-1">
-                    Accent{!isPro && <Crown size={11} className="text-brand" />}
-                  </span>
-                  <div className="flex items-center gap-1.5">
-                    {ACCENTS.map((c) => (
-                      <button
-                        key={c}
-                        aria-label="accent color"
-                        title={isPro ? "" : "Pro feature"}
-                        onClick={() =>
-                          isPro
-                            ? set("accent", c)
-                            : proGate("Custom accent colors")
-                        }
-                        className="w-5 h-5 rounded-full border-2 transition"
-                        style={{
-                          background: c,
-                          borderColor:
-                            (data.accent || "#15634f") === c
-                              ? "#1b1a17"
-                              : "transparent",
-                          opacity: isPro ? 1 : 0.55,
-                        }}
-                      />
-                    ))}
-                  </div>
-                  {isPro && data.accent && data.accent !== "#15634f" ? (
-                    <button
-                      onClick={() => set("accent", "")}
-                      className="text-xs text-ink2 underline hover:text-ink"
-                    >
-                      reset
-                    </button>
-                  ) : null}
-                </div>
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15"
+                    fill="none"
+                    stroke="#18a884"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray="94.2"
+                    strokeDashoffset={94.2 - (94.2 * completeness) / 100}
+                    transform="rotate(-90 18 18)"
+                  />
+                </svg>
+                <span
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: 9,
+                    fontWeight: 700,
+                  }}
+                >
+                  {completeness}%
+                </span>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <DownloadBtn
-                onClick={() => exportPDF({ pro: isPro })}
-                icon={Download}
-                label="PDF"
-                primary
-              />
-              <DownloadBtn
-                onClick={() => exportWord(previewData.name, { pro: isPro })}
-                icon={FileText}
-                label="Word"
-              />
+              <span className="text-xs text-ink2">complete</span>
             </div>
           </div>
-          <div className="w-full max-w-[1100px] mx-auto">
-            <ResumePreview r={previewData} template={template} />
+          <div
+            className="w-full max-w-[1100px] mx-auto rounded-xl p-3 sm:p-5"
+            style={{
+              backgroundImage:
+                "radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+          >
+            <div
+              className="rounded-md overflow-hidden"
+              style={{
+                boxShadow:
+                  "0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(0,0,0,.35)",
+              }}
+            >
+              <ResumePreview r={previewData} template={template} />
+            </div>
           </div>
         </div>
       </div>
