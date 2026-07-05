@@ -1,5 +1,4 @@
 
-
 export const dsaProblems = {
   "Two Sum": {
     func: "two_sum",
@@ -461,4 +460,31 @@ export const dsaProblems = {
     starter:
       "def longest_consecutive(nums):\n    s = set(nums)\n    best = 0\n    # TODO: start runs only at sequence beginnings\n    return best\n\nprint(longest_consecutive([100,4,200,1,3,2]))  # expected 4",
   },
+};
+
+// Optimal (target) time & space complexity per problem — shown on the problem page.
+export const complexities = {
+  "Two Sum": { time: "O(n)", space: "O(n)" },
+  "Contains Duplicate": { time: "O(n)", space: "O(n)" },
+  "Group Anagrams": { time: "O(n·k)", space: "O(n·k)" },
+  "Top K Frequent Elements": { time: "O(n)", space: "O(n)" },
+  "Product of Array Except Self": { time: "O(n)", space: "O(1)" },
+  "Valid Palindrome": { time: "O(n)", space: "O(1)" },
+  "3Sum": { time: "O(n²)", space: "O(1)" },
+  "Container With Most Water": { time: "O(n)", space: "O(1)" },
+  "Best Time to Buy and Sell Stock": { time: "O(n)", space: "O(1)" },
+  "Valid Parentheses": { time: "O(n)", space: "O(n)" },
+  "Binary Search": { time: "O(log n)", space: "O(1)" },
+  "Reverse Linked List": { time: "O(n)", space: "O(1)" },
+  "Merge Two Sorted Lists": { time: "O(n + m)", space: "O(1)" },
+  "Invert Binary Tree": { time: "O(n)", space: "O(h)" },
+  "Maximum Depth of Binary Tree": { time: "O(n)", space: "O(h)" },
+  "Maximum Subarray": { time: "O(n)", space: "O(1)" },
+  "Climbing Stairs": { time: "O(n)", space: "O(1)" },
+  "House Robber": { time: "O(n)", space: "O(1)" },
+  "Coin Change": { time: "O(n·A)", space: "O(A)" },
+  "Number of Islands": { time: "O(m·n)", space: "O(m·n)" },
+  "Single Number": { time: "O(n)", space: "O(1)" },
+  "Number of 1 Bits": { time: "O(1)", space: "O(1)" },
+  "Longest Consecutive Sequence": { time: "O(n)", space: "O(n)" },
 };
