@@ -1078,7 +1078,6 @@ export default function Prep() {
       <UpgradeModal open={ivUpgrade} feature="Mock Interview" onClose={() => setIvUpgrade(false)} onUpgrade={() => { setIvUpgrade(false); ivNav("/pricing"); }} />
       <UpgradeModal open={solUpgrade} feature="AI Solutions" onClose={() => setSolUpgrade(false)} onUpgrade={() => { setSolUpgrade(false); ivNav("/pricing"); }} />
       <style>{`@keyframes secUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes sideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}@keyframes pop{0%{transform:scale(.8)}55%{transform:scale(1.15)}100%{transform:scale(1)}}`}</style>
-
     </div>
   );
 }
