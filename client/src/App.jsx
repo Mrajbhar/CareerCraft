@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Builder = lazy(() => import("./pages/Builder"));
-const ResumeView = lazy(() => import("./pages/ResumeView"));
+const ResumeView = lazy(() => import("./pages/Resumeview"));
 const Prep = lazy(() => import("./pages/Prep"));
 const Templates = lazy(() => import("./pages/Templates"));
 const Checker = lazy(() => import("./pages/Checker"));
